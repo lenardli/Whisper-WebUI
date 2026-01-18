@@ -35,6 +35,31 @@ CSS = """
 #md_project a:hover {
   text-decoration: underline;
 }
+
+/* Hide Gradio footer and all footer links */
+footer {
+    display: none !important;
+}
+
+.footer {
+    display: none !important;
+}
+
+.gradio-footer {
+    display: none !important;
+}
+
+/* Hide "Использовать через API" and "создано с помощью Gradio" links */
+a[href*="gradio.app"],
+a[href*="api"],
+footer a {
+    display: none !important;
+}
+
+/* Hide "Whisper-WebUI" title */
+#md_project {
+    display: none !important;
+}
 """
 
 MARKDOWN = """
