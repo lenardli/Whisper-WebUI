@@ -11,13 +11,13 @@ Group=YOUR_USERNAME
 WorkingDirectory=/path/to/whisper-webui
 Environment="PATH=/path/to/whisper-webui/venv/bin:/usr/local/bin:/usr/bin:/bin"
 # Запуск приложения через Python из виртуального окружения
-ExecStart=/path/to/whisper-webui/venv/bin/python /path/to/whisper-webui/app.py --server_name 0.0.0.0 --server_port 7860 --inbrowser false
+ExecStart=/path/to/whisper-webui/venv/bin/python /path/to/whisper-webui/app.py --server_name 0.0.0.0 --server_port 7860
 # Автоматический перезапуск при сбое
 Restart=always
 RestartSec=10
 # Логирование в systemd journal
-StandardOutput=journal
-StandardError=journal
+StandardOutput=/var/log/whisper-webui.log
+StandardError=/var/log/whisper-webui.log
 
 # Ограничения ресурсов (опционально, раскомментируйте при необходимости)
 # LimitNOFILE=65536
