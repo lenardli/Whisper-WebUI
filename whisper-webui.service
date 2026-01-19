@@ -1,0 +1,28 @@
+
+[Unit]
+Description=Whisper-WebUI Service
+After=network.target
+
+[Service]
+Type=simple
+# Укажите имя вашего пользователя Linux вместо YOUR_USERNAME
+User=sapr
+Group=sapr
+# Укажите полный путь к директории проекта вместо /path/to/whisper-webui
+WorkingDirectory=/home/sapr/Desktop/Whisper-WebUI
+#Environment="PATH=/path/to/whisper-webui/venv/bin:/usr/local/bin:/usr/bin:/bin"
+# Запуск приложения через Python из виртуального окружения
+ExecStart=/home/sapr/Whisper-WebUI/venv/bin/python app.py --server_name 0.0.0.0 --server_port 7860
+# Автоматический перезапуск при сбое
+Restart=always
+RestartSec=10
+# Логирование в systemd journal
+StandardOutput=/var/log/whisper-webui.log
+StandardError=/var/log/whisper-webui-error.log
+
+# Ограничения ресурсов (опционально, раскомментируйте при необходимости)
+# LimitNOFILE=65536
+# LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target

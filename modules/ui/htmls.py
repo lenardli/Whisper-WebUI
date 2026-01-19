@@ -35,6 +35,31 @@ CSS = """
 #md_project a:hover {
   text-decoration: underline;
 }
+
+/* Hide Gradio footer and all footer links */
+footer {
+    display: none !important;
+}
+
+.footer {
+    display: none !important;
+}
+
+.gradio-footer {
+    display: none !important;
+}
+
+/* Hide "Использовать через API" and "создано с помощью Gradio" links */
+a[href*="gradio.app"],
+a[href*="api"],
+footer a {
+    display: none !important;
+}
+
+/* Hide "Whisper-WebUI" title */
+#md_project {
+    display: none !important;
+}
 """
 
 MARKDOWN = """
@@ -66,12 +91,12 @@ NLLB_VRAM_TABLE = """
 <body>
 
 <details>
-  <summary>VRAM usage for each model</summary>
+  <summary>Использование VRAM каждой моделью</summary>
   <table>
     <thead>
       <tr>
-        <th>Model name</th>
-        <th>Required VRAM</th>
+        <th>Модель</th>
+        <th>VRAM</th>
       </tr>
     </thead>
     <tbody>
@@ -89,7 +114,7 @@ NLLB_VRAM_TABLE = """
       </tr>
     </tbody>
   </table>
-  <p><strong>Note:</strong> Be mindful of your VRAM! The table above provides an approximate VRAM usage for each model.</p>
+  <p><strong>ВАЖНО! </strong>В таблице отражено лишь общее количество используемой VRAM моделью.</p>
 </details>
 
 </body>

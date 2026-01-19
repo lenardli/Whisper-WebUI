@@ -105,11 +105,9 @@ class App:
             lang = gr.Radio(choices=list(self.i18n.keys()),
                             label=_("Language"), interactive=True,
                             visible=False,  # Set it by development purpose.
+                            value="ru"  # Set default language to Russian
                             )
-            with Translate(self.i18n):  # Add `lang = lang` here to test dynamic change of the languages.
-                with gr.Row():
-                    with gr.Column():
-                        gr.Markdown(MARKDOWN, elem_id="md_project")
+            with Translate(self.i18n, lang=lang):  # Set Russian as default language via Radio default value
                 with gr.Tabs():
                     with gr.TabItem(_("File")):  # tab1
                         with gr.Column():
@@ -318,7 +316,8 @@ class App:
             ssl_keyfile=args.ssl_keyfile,
             ssl_keyfile_password=args.ssl_keyfile_password,
             ssl_certfile=args.ssl_certfile,
-            allowed_paths=eval(args.allowed_paths) if args.allowed_paths else None
+            allowed_paths=eval(args.allowed_paths) if args.allowed_paths else None,
+            show_api=False  # Hide "Использовать через API" link
         )
 
     @staticmethod
