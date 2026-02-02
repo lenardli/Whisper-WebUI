@@ -31,4 +31,4 @@ VOLUME [ "/Whisper-WebUI/outputs" ]
 ENV PATH="/Whisper-WebUI/venv/bin:$PATH"
 ENV LD_LIBRARY_PATH=/Whisper-WebUI/venv/lib64/python3.11/site-packages/nvidia/cublas/lib:/Whisper-WebUI/venv/lib64/python3.11/site-packages/nvidia/cudnn/lib
 
-ENTRYPOINT [ "python", "app.py" ]
+ENTRYPOINT [ "python", "app.py", "--server_name", "0.0.0.0", "--server_port", "7860" ]
