@@ -2,10 +2,11 @@
 Composite transcription pipeline: GigaAM-v3 + Faster-Whisper in one interface.
 Dispatches by model_size so GigaAM is selectable from the same Model dropdown.
 """
-from typing import List, Union, Optional, Callable
+from typing import List, Union, Optional, Callable, Tuple
+import numpy as np
 import gradio as gr
 
-from modules.whisper.data_classes import TranscriptionPipelineParams
+from modules.whisper.data_classes import TranscriptionPipelineParams, WhisperParams, Segment
 from modules.whisper.gigaam_inference import GigaAMInference, GIGAAM_MODEL_ID
 from modules.whisper.base_transcription_pipeline import BaseTranscriptionPipeline
 
@@ -35,6 +36,32 @@ class CompositeTranscriptionPipeline(BaseTranscriptionPipeline):
     def _use_gigaam(self, pipeline_params: list) -> bool:
         params = TranscriptionPipelineParams.from_list(pipeline_params)
         return params.whisper.model_size == GIGAAM_MODEL_ID
+
+    def transcribe(self,
+                   audio: Union[str, bytes, np.ndarray],
+                   progress: gr.Progress = gr.Progress(),
+                   progress_callback: Optional[Callable] = None,
+                   *whisper_params,
+                   ) -> Tuple[List[Segment], float]:
+        """Delegate to GigaAM or Faster-Whisper based on model_size in whisper_params."""
+        params = WhisperParams.from_list(list(whisper_params))
+        if params.model_size == GIGAAM_MODEL_ID:
+            return self.gigaam_inf.transcribe(
+                audio, progress, progress_callback, *whisper_params
+            )
+        return self.faster_whisper_inf.transcribe(
+            audio, progress, progress_callback, *whisper_params
+        )
+
+    def update_model(self,
+                     model_size: str,
+                     compute_type: str,
+                     progress: gr.Progress = gr.Progress()):
+        """Delegate to the backend that owns the given model."""
+        if model_size == GIGAAM_MODEL_ID:
+            self.gigaam_inf.update_model(model_size, compute_type, progress)
+        else:
+            self.faster_whisper_inf.update_model(model_size, compute_type, progress)
 
     def run(self,
             audio: Union[str, bytes, list],
