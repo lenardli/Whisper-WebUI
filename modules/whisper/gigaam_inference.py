@@ -141,6 +141,8 @@ class GigaAMInference(BaseTranscriptionPipeline):
                 revision=GIGAAM_REVISION,
                 trust_remote_code=True,
             ).to(device)
+            # Keep model in float32 to avoid "Input type (float) and bias type (c10::Half)" mismatch
+            self._gigaam_model = self._gigaam_model.float()
             self._gigaam_model.eval()
             self.current_model_size = GIGAAM_MODEL_ID
             self.current_compute_type = compute_type
