@@ -132,6 +132,9 @@ class GigaAMInference(BaseTranscriptionPipeline):
         try:
             from transformers import AutoModel
             import torch
+            # GigaAM longform/VAD pipeline ожидает HF_TOKEN; ставим безопасное
+            # значение по умолчанию, если пользователь явно не задал токен.
+            os.environ.setdefault("HF_TOKEN", " ")
             device = "cuda" if torch.cuda.is_available() else "cpu"
             self._gigaam_model = AutoModel.from_pretrained(
                 GIGAAM_MODEL_ID,
