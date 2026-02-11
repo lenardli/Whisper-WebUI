@@ -7,6 +7,8 @@ from modules.utils.paths import (FASTER_WHISPER_MODELS_DIR, DIARIZATION_MODELS_D
 from modules.whisper.faster_whisper_inference import FasterWhisperInference
 from modules.whisper.whisper_Inference import WhisperInference
 from modules.whisper.insanely_fast_whisper_inference import InsanelyFastWhisperInference
+from modules.whisper.gigaam_inference import GigaAMInference
+from modules.whisper.composite_transcription_pipeline import CompositeTranscriptionPipeline
 from modules.whisper.base_transcription_pipeline import BaseTranscriptionPipeline
 from modules.whisper.data_classes import *
 from modules.utils.logger import get_logger
@@ -70,12 +72,18 @@ class WhisperFactory:
                     uvr_model_dir=uvr_model_dir
                 )
 
-            return FasterWhisperInference(
+            faster_whisper_inf = FasterWhisperInference(
                 model_dir=faster_whisper_model_dir,
                 output_dir=output_dir,
                 diarization_model_dir=diarization_model_dir,
                 uvr_model_dir=uvr_model_dir
             )
+            gigaam_inf = GigaAMInference(
+                output_dir=output_dir,
+                diarization_model_dir=diarization_model_dir,
+                uvr_model_dir=uvr_model_dir
+            )
+            return CompositeTranscriptionPipeline(faster_whisper_inf, gigaam_inf)
         elif whisper_type == WhisperImpl.WHISPER.value:
             return WhisperInference(
                 model_dir=whisper_model_dir,
