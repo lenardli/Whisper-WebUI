@@ -16,6 +16,9 @@ from modules.utils.paths import (FASTER_WHISPER_MODELS_DIR, DIARIZATION_MODELS_D
 from modules.whisper.data_classes import *
 from modules.whisper.base_transcription_pipeline import BaseTranscriptionPipeline
 
+# Excluded from dropdown: only large and custom models are offered
+FASTER_WHISPER_EXCLUDED_MODELS = {"tiny", "small", "base", "medium"}
+
 
 class FasterWhisperInference(BaseTranscriptionPipeline):
     def __init__(self,
@@ -136,24 +139,30 @@ class FasterWhisperInference(BaseTranscriptionPipeline):
         progress(0, desc="Initializing Model..")
 
         model_size_dirname = model_size.replace("/", "--") if "/" in model_size else model_size
+        # Use correct Hugging Face repo for standard faster-whisper sizes (tiny, base, small, ...)
+        if model_size in faster_whisper.available_models():
+            hf_repo_id = f"Systran/faster-whisper-{model_size}"
+        else:
+            hf_repo_id = model_size
+
         if model_size not in self.model_paths and model_size_dirname not in self.model_paths:
-            print(f"Model is not detected. Trying to download \"{model_size}\" from huggingface to "
+            print(f"Model is not detected. Trying to download \"{hf_repo_id}\" from huggingface to "
                   f"\"{os.path.join(self.model_dir, model_size_dirname)} ...")
             huggingface_hub.snapshot_download(
-                model_size,
+                hf_repo_id,
                 local_dir=os.path.join(self.model_dir, model_size_dirname),
             )
             self.model_paths = self.get_model_paths()
             gr.Info(f"Model is downloaded with the name \"{model_size_dirname}\"")
 
-        self.current_model_size = self.model_paths[model_size_dirname]
+        self.current_model_size = self.model_paths.get(model_size_dirname) or self.model_paths.get(model_size)
+        # Prefer full path so WhisperModel opens model.bin in the right folder
+        if isinstance(self.current_model_size, str) and not os.path.isabs(self.current_model_size):
+            local_path = os.path.join(self.model_dir, self.current_model_size)
+            if os.path.isdir(local_path):
+                self.current_model_size = local_path
 
-        local_files_only = False
-        hf_prefix = "models--Systran--faster-whisper-"
-        official_model_path = os.path.join(self.model_dir, hf_prefix+model_size)
-        if ((os.path.isdir(self.current_model_size) and os.path.exists(self.current_model_size)) or
-            (model_size in faster_whisper.available_models() and os.path.exists(official_model_path))):
-            local_files_only = True
+        local_files_only = isinstance(self.current_model_size, str) and os.path.isdir(self.current_model_size)
 
         self.current_compute_type = compute_type
         self.model = faster_whisper.WhisperModel(
@@ -167,24 +176,33 @@ class FasterWhisperInference(BaseTranscriptionPipeline):
     def get_model_paths(self):
         """
         Get available models from models path including fine-tuned model.
-
-        Returns
-        ----------
-        Name list of models
+        For local folders, use full path so WhisperModel finds model.bin correctly.
+        Excludes tiny, small, base, medium from the list.
         """
-        model_paths = {model:model for model in faster_whisper.available_models()}
+        all_models = faster_whisper.available_models()
+        model_paths = {
+            model: model for model in all_models
+            if model not in FASTER_WHISPER_EXCLUDED_MODELS and not model.endswith(".en")
+        }
         faster_whisper_prefix = "models--Systran--faster-whisper-"
 
+        if not os.path.isdir(self.model_dir):
+            return model_paths
         existing_models = os.listdir(self.model_dir)
         wrong_dirs = [".locks", "faster_whisper_models_will_be_saved_here"]
         existing_models = list(set(existing_models) - set(wrong_dirs))
 
-        for model_name in existing_models:
-            if faster_whisper_prefix in model_name:
-                model_name = model_name[len(faster_whisper_prefix):]
-
-            if model_name not in whisper.available_models():
-                model_paths[model_name] = os.path.join(self.model_dir, model_name)
+        for dir_name in existing_models:
+            full_path = os.path.join(self.model_dir, dir_name)
+            if not os.path.isdir(full_path):
+                continue
+            display_name = dir_name
+            if faster_whisper_prefix in dir_name:
+                display_name = dir_name[len(faster_whisper_prefix):]
+            if display_name in FASTER_WHISPER_EXCLUDED_MODELS or display_name.endswith(".en"):
+                continue
+            # Prefer full path so CTranslate2 opens model.bin in the right folder
+            model_paths[display_name] = full_path
         return model_paths
 
     @staticmethod
