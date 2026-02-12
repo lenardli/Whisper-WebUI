@@ -3,6 +3,7 @@ GigaAM-v3 (ai-sage/GigaAM-v3) inference for transcription.
 Uses Hugging Face Transformers with trust_remote_code; supports file and microphone input.
 """
 import os
+from load_dotenv import load_dotenv
 import time
 import tempfile
 from typing import BinaryIO, Union, Tuple, List, Callable, Optional
@@ -16,6 +17,9 @@ from modules.utils.logger import get_logger
 
 logger = get_logger()
 
+load_dotenv()
+
+HF_TOKEN = os.environ.get("HF_TOKEN")
 GIGAAM_MODEL_ID = "ai-sage/GigaAM-v3"
 GIGAAM_REVISION = "e2e_rnnt"
 
@@ -134,14 +138,13 @@ class GigaAMInference(BaseTranscriptionPipeline):
             import torch
             # GigaAM longform/VAD pipeline ожидает HF_TOKEN; ставим безопасное
             # значение по умолчанию, если пользователь явно не задал токен.
-            os.environ.setdefault("HF_TOKEN", " ")
+            os.environ.setdefault("HF_TOKEN", HF_TOKEN)
             device = "cuda" if torch.cuda.is_available() else "cpu"
             self._gigaam_model = AutoModel.from_pretrained(
                 GIGAAM_MODEL_ID,
                 revision=GIGAAM_REVISION,
                 trust_remote_code=True,
             ).to(device)
-            # Keep model in float32 to avoid "Input type (float) and bias type (c10::Half)" mismatch
             self._gigaam_model = self._gigaam_model.float()
             self._gigaam_model.eval()
             self.current_model_size = GIGAAM_MODEL_ID

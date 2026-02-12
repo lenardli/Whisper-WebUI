@@ -3,9 +3,10 @@
 *.mp4
 *.mp3
 **/.env
+env/
 **/.idea/
 **/.pytest_cache/
-**/venv/
+venv/
 **/__pycache__/
 outputs/
 models/
