@@ -13,6 +13,7 @@ from modules.translation.nllb_inference import NLLBInference
 from modules.ui.htmls import *
 from modules.utils.cli_manager import str2bool
 from modules.utils.youtube_manager import get_ytmetas
+from modules.utils.rutube_manager import get_rutube_metas
 from modules.translation.deepl_api import DeepLAPI
 from modules.whisper.data_classes import *
 from modules.utils.logger import get_logger
@@ -143,15 +144,15 @@ class App:
                                       outputs=[tb_indicator, files_subtitles])
                         btn_openfolder.click(fn=lambda: self.open_folder("outputs"), inputs=None, outputs=None)
 
-                    with gr.TabItem(_("Youtube")):  # tab2
+                    with gr.TabItem(_("Rutube")):  # tab2
                         with gr.Row():
-                            tb_youtubelink = gr.Textbox(label=_("Youtube Link"))
+                            tb_rutubelink = gr.Textbox(label=_("Rutube Link"))
                         with gr.Row(equal_height=True):
                             with gr.Column():
-                                img_thumbnail = gr.Image(label=_("Youtube Thumbnail"))
+                                img_thumbnail = gr.Image(label=_("Rutube Thumbnail"))
                             with gr.Column():
-                                tb_title = gr.Label(label=_("Youtube Title"))
-                                tb_description = gr.Textbox(label=_("Youtube Description"), max_lines=15)
+                                tb_title = gr.Label(label=_("Rutube Title"))
+                                tb_description = gr.Textbox(label=_("Rutube Description"), max_lines=15)
 
                         pipeline_params, dd_file_format, cb_timestamp = self.create_pipeline_inputs()
 
@@ -162,13 +163,13 @@ class App:
                             files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
                             btn_openfolder = gr.Button('📂', scale=1)
 
-                        params = [tb_youtubelink, dd_file_format, cb_timestamp]
+                        params = [tb_rutubelink, dd_file_format, cb_timestamp]
 
-                        btn_run.click(fn=self.whisper_inf.transcribe_youtube,
+                        btn_run.click(fn=self.whisper_inf.transcribe_rutube,
                                       inputs=params + pipeline_params,
                                       outputs=[tb_indicator, files_subtitles])
-                        tb_youtubelink.change(get_ytmetas, inputs=[tb_youtubelink],
-                                              outputs=[img_thumbnail, tb_title, tb_description])
+                        tb_rutubelink.change(get_rutube_metas, inputs=[tb_rutubelink],
+                                             outputs=[img_thumbnail, tb_title, tb_description])
                         btn_openfolder.click(fn=lambda: self.open_folder("outputs"), inputs=None, outputs=None)
 
                     with gr.TabItem(_("Mic")):  # tab3

@@ -132,3 +132,19 @@ class CompositeTranscriptionPipeline(BaseTranscriptionPipeline):
         return self.faster_whisper_inf.transcribe_youtube(
             youtube_link, file_format, add_timestamp, progress, *pipeline_params
         )
+
+    def transcribe_rutube(self,
+                         rutube_link: str,
+                         file_format: str = "SRT",
+                         add_timestamp: bool = True,
+                         progress=gr.Progress(),
+                         *pipeline_params,
+                         ):
+        pipeline_list = list(pipeline_params)
+        if self._use_gigaam(pipeline_list):
+            return self.gigaam_inf.transcribe_rutube(
+                rutube_link, file_format, add_timestamp, progress, *pipeline_params
+            )
+        return self.faster_whisper_inf.transcribe_rutube(
+            rutube_link, file_format, add_timestamp, progress, *pipeline_params
+        )
