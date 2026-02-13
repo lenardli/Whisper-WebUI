@@ -1,5 +1,7 @@
 import os
 import argparse
+import platform
+import subprocess
 import gradio as gr
 from gradio_i18n import Translate, gettext as _
 import yaml
