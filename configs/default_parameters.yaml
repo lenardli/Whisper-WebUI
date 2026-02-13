@@ -43,7 +43,6 @@ vad:
 diarization:
   is_diarize: true
   diarization_device: cpu
-  hf_token: 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
   enable_offload: true
 bgm_separation:
   is_separate_bgm: false
