@@ -1,6 +1,8 @@
 import faster_whisper.transcribe
 import gradio as gr
 import torch
+import os
+from load_dotenv import load_dotenv
 from typing import Optional, Dict, List, Union, NamedTuple
 from fastapi import Query
 from pydantic import BaseModel, Field, field_validator, ConfigDict
@@ -11,6 +13,7 @@ import yaml
 
 from modules.utils.constants import *
 
+load_dotenv()
 
 class WhisperImpl(Enum):
     WHISPER = "whisper"
@@ -157,7 +160,7 @@ class DiarizationParams(BaseParams):
     is_diarize: bool = Field(default=False, description="Enable speaker diarization")
     diarization_device: str = Field(default="cuda", description="Device to run Diarization model.")
     hf_token: str = Field(
-        default="",
+        default=os.environ.get("HF_TOKEN"),
         description="Hugging Face token for downloading diarization models"
     )
     enable_offload: bool = Field(
