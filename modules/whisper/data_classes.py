@@ -617,8 +617,11 @@ class TranscriptionPipelineParams(BaseModel):
         vad_list = data_list[0:len(VadParams.__annotations__)]
         data_list = data_list[len(VadParams.__annotations__):]
 
-        diarization_list = data_list[0:len(DiarizationParams.__annotations__)]
-        data_list = data_list[len(DiarizationParams.__annotations__):]
+        # Diarization UI has 3 inputs (no hf_token field); model has 4 fields — inject HF_TOKEN from .env
+        n_diarization_ui = 3
+        diarization_raw = (data_list[0:n_diarization_ui] + [None, None, None])[:n_diarization_ui]
+        data_list = data_list[n_diarization_ui:]
+        diarization_list = [diarization_raw[0], diarization_raw[1], HF_TOKEN or "", diarization_raw[2]]
 
         bgm_sep_list = data_list[0:len(BGMSeparationParams.__annotations__)]
 
