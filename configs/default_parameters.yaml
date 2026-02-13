@@ -41,9 +41,8 @@ vad:
   min_silence_duration_ms: 1000
   speech_pad_ms: 2000
 diarization:
-  is_diarize: true
+  is_diarize: false
   diarization_device: cpu
-  hf_token: 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
   enable_offload: true
 bgm_separation:
   is_separate_bgm: false
