@@ -160,7 +160,7 @@ class DiarizationParams(BaseParams):
     is_diarize: bool = Field(default=False, description="Enable speaker diarization")
     diarization_device: str = Field(default="cuda", description="Device to run Diarization model.")
     hf_token: str = Field(
-        default=os.environ.get("HF_TOKEN"),
+        default="",
         description="Hugging Face token for downloading diarization models"
     )
     enable_offload: bool = Field(
