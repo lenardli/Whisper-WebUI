@@ -142,7 +142,11 @@ class App:
                         btn_run.click(fn=self.whisper_inf.transcribe_file,
                                       inputs=params,
                                       outputs=[tb_indicator, files_subtitles])
-                        btn_openfolder.click(fn=lambda: self.open_folder("outputs"), inputs=None, outputs=None)
+                        btn_openfolder.click(
+                            fn=lambda: self.open_folder(self.args.output_dir),
+                            inputs=None,
+                            outputs=None,
+                        )
 
                     with gr.TabItem(_("Rutube")):  # tab2
                         with gr.Row():
@@ -170,7 +174,11 @@ class App:
                                       outputs=[tb_indicator, files_subtitles])
                         tb_rutubelink.change(get_rutube_metas, inputs=[tb_rutubelink],
                                              outputs=[img_thumbnail, tb_title, tb_description])
-                        btn_openfolder.click(fn=lambda: self.open_folder("outputs"), inputs=None, outputs=None)
+                        btn_openfolder.click(
+                            fn=lambda: self.open_folder(self.args.output_dir),
+                            inputs=None,
+                            outputs=None,
+                        )
 
                     with gr.TabItem(_("Mic")):  # tab3
                         with gr.Row():
@@ -191,7 +199,11 @@ class App:
                         btn_run.click(fn=self.whisper_inf.transcribe_mic,
                                       inputs=params + pipeline_params,
                                       outputs=[tb_indicator, files_subtitles])
-                        btn_openfolder.click(fn=lambda: self.open_folder("outputs"), inputs=None, outputs=None)
+                        btn_openfolder.click(
+                            fn=lambda: self.open_folder(self.args.output_dir),
+                            inputs=None,
+                            outputs=None,
+                        )
 
                     with gr.TabItem(_("T2T Translation")):  # tab 4
                         with gr.Row():
@@ -317,17 +329,27 @@ class App:
             ssl_keyfile=args.ssl_keyfile,
             ssl_keyfile_password=args.ssl_keyfile_password,
             ssl_certfile=args.ssl_certfile,
-            allowed_paths=eval(args.allowed_paths) if args.allowed_paths else None,
+            allowed_paths=(
+                eval(args.allowed_paths)
+                if args.allowed_paths
+                else [os.path.abspath(args.output_dir)]
+            ),
             show_api=False  # Hide "Использовать через API" link
         )
 
     @staticmethod
-    def open_folder(folder_path: str):
-        if os.path.exists(folder_path):
-            os.system(f"start {folder_path}")
+    def open_folder(folder_path: str) -> None:
+        """Open the output folder in the system file manager. Uses absolute path."""
+        path = os.path.abspath(folder_path)
+        if not os.path.exists(path):
+            os.makedirs(path, exist_ok=True)
+            logger.info("The directory path %s has newly created.", path)
+        if os.name == "nt":
+            os.startfile(path)
+        elif platform.system() == "Darwin":
+            subprocess.run(["open", path], check=False)
         else:
-            os.makedirs(folder_path, exist_ok=True)
-            logger.info(f"The directory path {folder_path} has newly created.")
+            subprocess.run(["xdg-open", path], check=False)
 
 
 parser = argparse.ArgumentParser()
