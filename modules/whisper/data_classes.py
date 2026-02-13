@@ -3,7 +3,7 @@ import gradio as gr
 import torch
 import os
 from load_dotenv import load_dotenv
-from typing import Optional, Dict, List, Union, NamedTuple
+from typing import Optional, Dict, List, Union, NamedTuple, get_origin, get_args
 from fastapi import Query
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from gradio_i18n import Translate, gettext as _
@@ -13,7 +13,9 @@ import yaml
 
 from modules.utils.constants import *
 
+# Load environment variables from .env so HF_TOKEN is available for defaults
 load_dotenv()
+HF_TOKEN = os.environ.get("HF_TOKEN", "")
 
 class WhisperImpl(Enum):
     WHISPER = "whisper"
@@ -160,8 +162,8 @@ class DiarizationParams(BaseParams):
     is_diarize: bool = Field(default=False, description="Enable speaker diarization")
     diarization_device: str = Field(default="cuda", description="Device to run Diarization model.")
     hf_token: str = Field(
-        default="",
-        description="Hugging Face token for downloading diarization models"
+        default=HF_TOKEN,
+        description="Hugging Face token for downloading diarization models (loaded from HF_TOKEN in .env)"
     )
     enable_offload: bool = Field(
         default=True,
@@ -183,11 +185,7 @@ class DiarizationParams(BaseParams):
                 choices=["cpu", "cuda", "xpu"] if available_devices is None else available_devices,
                 value=defaults.get("device", device),
             ),
-            gr.Textbox(
-                label=_("HuggingFace Token"),
-                value=defaults.get("hf_token", cls.__fields__["hf_token"].default),
-                info=_("This is only needed the first time you download the model")
-            ),
+            # HF token now comes from HF_TOKEN in .env; no manual input needed in UI
             gr.Checkbox(
                 label=_("Offload sub model when finished"),
                 value=defaults.get("enable_offload", cls.__fields__["enable_offload"].default),
@@ -619,8 +617,11 @@ class TranscriptionPipelineParams(BaseModel):
         vad_list = data_list[0:len(VadParams.__annotations__)]
         data_list = data_list[len(VadParams.__annotations__):]
 
-        diarization_list = data_list[0:len(DiarizationParams.__annotations__)]
-        data_list = data_list[len(DiarizationParams.__annotations__):]
+        # Diarization UI has 3 inputs (no hf_token field); model has 4 fields — inject HF_TOKEN from .env
+        n_diarization_ui = 3
+        diarization_raw = (data_list[0:n_diarization_ui] + [None, None, None])[:n_diarization_ui]
+        data_list = data_list[n_diarization_ui:]
+        diarization_list = [diarization_raw[0], diarization_raw[1], HF_TOKEN or "", diarization_raw[2]]
 
         bgm_sep_list = data_list[0:len(BGMSeparationParams.__annotations__)]
 
