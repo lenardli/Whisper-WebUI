@@ -552,8 +552,6 @@ ru:
     файла
   Offload sub model when finished: Выгрузить подмодель после завершения
   Advanced Parameters: Расширенные параметры
-  Enabling this will remove background music: Включение этого удалит фоновую музыку
-    с помощью подмодели перед транскрипцией
   Enable Background Music Remover Filter: Включить фильтр удаления фоновой музыки
   Device: Устройство
   Save separated files to output: Сохранить разделенные файлы в выходную папку
@@ -606,8 +604,6 @@ ru:
   Voice: Голос
   Background Noise Remover Filter: Фильтр удаления фонового шума
   Enable Background Noise Remover Filter: Включить фильтр удаления фонового шума
-  Enabling this will remove background music: Включение этого удалит фоновую музыку
-    с помощью подмодели перед транскрипцией
   Enabling this will remove background noise: Включение этого удалит фоновый шум
   BGM Separation: Разделение фонового шума
 tr:

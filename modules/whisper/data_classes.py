@@ -226,7 +226,6 @@ class BGMSeparationParams(BaseParams):
                 label=_("Enable Background Noise Remover Filter"),
                 value=defaults.get("is_separate_bgm", cls.__fields__["is_separate_bgm"].default),
                 interactive=True,
-                info=_("Enabling this will remove background noise")
             ),
             gr.Dropdown(
                 label=_("Model"),
