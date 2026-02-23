@@ -167,7 +167,7 @@ class App:
                             btn_run = gr.Button(_("GENERATE SUBTITLE FILE"), variant="primary")
                         with gr.Row():
                             tb_indicator = gr.Textbox(label=_("Output"), scale=5)
-                            files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
+                            files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3, interactive=False)
                             btn_openfolder = gr.DownloadButton(
                                 value=App.first_file_for_download,
                                 inputs=[files_subtitles],
@@ -194,7 +194,7 @@ class App:
                             btn_run = gr.Button(_("GENERATE SUBTITLE FILE"), variant="primary")
                         with gr.Row():
                             tb_indicator = gr.Textbox(label=_("Output"), scale=5)
-                            files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
+                            files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3, interactive=False)
                             btn_openfolder = gr.DownloadButton(
                                 value=App.first_file_for_download,
                                 inputs=[files_subtitles],
@@ -234,7 +234,7 @@ class App:
                                 btn_run = gr.Button(_("TRANSLATE SUBTITLE FILE"), variant="primary")
                             with gr.Row():
                                 tb_indicator = gr.Textbox(label=_("Output"), scale=5)
-                                files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
+                                files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3, interactive=False)
                                 btn_openfolder = gr.DownloadButton(
                                     value=App.first_file_for_download,
                                     inputs=[files_subtitles],
@@ -268,7 +268,7 @@ class App:
                                 btn_run = gr.Button(_("TRANSLATE SUBTITLE FILE"), variant="primary")
                             with gr.Row():
                                 tb_indicator = gr.Textbox(label=_("Output"), scale=5)
-                                files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
+                                files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3, interactive=False)
                                 btn_openfolder = gr.DownloadButton(
                                     value=App.first_file_for_download,
                                     inputs=[files_subtitles],
