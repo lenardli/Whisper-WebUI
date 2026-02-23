@@ -60,12 +60,8 @@ en:
   Vocals: Vocals
   Background: Background
   Voice: Voice
-  Background Music Remover Filter: Background Music Remover Filter
   Background Noise Remover Filter: Background Noise Remover Filter
-  Enable Background Music Remover Filter: Enable Background Music Remover Filter
   Enable Background Noise Remover Filter: Enable Background Noise Remover Filter
-  Enabling this will remove background music: Enabling this will remove background
-    music by submodel before transcribing
   Enabling this will remove background noise: Enabling this will remove background noise
   BGM Separation: Background Noise Separation
 ko:
@@ -608,9 +604,7 @@ ru:
   Vocals: Вокал
   Background: Фон
   Voice: Голос
-  Background Music Remover Filter: Фильтр удаления фоновой музыки
   Background Noise Remover Filter: Фильтр удаления фонового шума
-  Enable Background Music Remover Filter: Включить фильтр удаления фоновой музыки
   Enable Background Noise Remover Filter: Включить фильтр удаления фонового шума
   Enabling this will remove background music: Включение этого удалит фоновую музыку
     с помощью подмодели перед транскрипцией
