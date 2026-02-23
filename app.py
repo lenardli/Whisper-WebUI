@@ -2,6 +2,9 @@ import os
 import argparse
 import platform
 import subprocess
+import shutil
+import time
+import uuid
 from typing import Optional
 import gradio as gr
 from gradio_i18n import Translate, gettext as _
@@ -23,6 +26,25 @@ from modules.utils.logger import get_logger
 
 
 logger = get_logger()
+
+
+def _clean_old_download_copies(directory: str, max_age_sec: int = 300) -> None:
+    """Remove temporary download copies older than max_age_sec in directory."""
+    if not os.path.isdir(directory):
+        return
+    now = time.time()
+    try:
+        for name in os.listdir(directory):
+            if not name.startswith("download_"):
+                continue
+            path = os.path.join(directory, name)
+            if os.path.isfile(path) and (now - os.path.getmtime(path)) > max_age_sec:
+                try:
+                    os.remove(path)
+                except OSError:
+                    pass
+    except OSError:
+        pass
 
 
 class App:
@@ -344,31 +366,54 @@ class App:
         )
 
     @staticmethod
+    def _path_for_download(path: str) -> Optional[str]:
+        """Copy file to a unique path and return it, so each download gets a fresh URL (avoids Gradio cache/URL reuse)."""
+        if not path or not os.path.isfile(path):
+            return None
+        base = os.path.basename(path)
+        parent = os.path.dirname(path)
+        download_dir = os.path.join(parent, ".download_cache")
+        try:
+            os.makedirs(download_dir, exist_ok=True)
+        except OSError:
+            download_dir = parent
+        unique_name = f"download_{uuid.uuid4().hex}_{base}"
+        dest = os.path.join(download_dir, unique_name)
+        try:
+            shutil.copy2(path, dest)
+            _clean_old_download_copies(download_dir, max_age_sec=300)
+            return dest
+        except OSError:
+            return path
+
+    @staticmethod
     def first_file_for_download(files_value) -> Optional[str]:
-        """Get first file path from gr.Files value for DownloadButton. Returns None if empty."""
+        """Get first file path from gr.Files value for DownloadButton. Returns path to a fresh copy for each download."""
         if not files_value:
             return None
         first = files_value[0] if isinstance(files_value, list) else files_value
+        path = None
         if isinstance(first, str) and os.path.isfile(first):
-            return first
-        if isinstance(first, dict):
+            path = first
+        elif isinstance(first, dict):
             path = first.get("path") or first.get("name")
-            if path and os.path.isfile(path):
-                return path
-        return None
+            if not path or not os.path.isfile(path):
+                path = None
+        return App._path_for_download(path) if path else None
 
     @staticmethod
     def audio_file_for_download(audio_value) -> Optional[str]:
-        """Get file path from gr.Audio value for DownloadButton. Returns None if empty."""
+        """Get file path from gr.Audio value for DownloadButton. Returns path to a fresh copy for each download."""
         if not audio_value:
             return None
+        path = None
         if isinstance(audio_value, str) and os.path.isfile(audio_value):
-            return audio_value
-        if isinstance(audio_value, dict):
+            path = audio_value
+        elif isinstance(audio_value, dict):
             path = audio_value.get("path") or audio_value.get("name")
-            if path and os.path.isfile(path):
-                return path
-        return None
+            if not path or not os.path.isfile(path):
+                path = None
+        return App._path_for_download(path) if path else None
 
     @staticmethod
     def open_folder(folder_path: str) -> None:
