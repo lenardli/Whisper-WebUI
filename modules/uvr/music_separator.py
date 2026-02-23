@@ -81,7 +81,7 @@ class MusicSeparator:
                  save_file: bool = False,
                  progress: gr.Progress = gr.Progress()) -> tuple[np.ndarray, np.ndarray, List]:
         """
-        Separate the background music from the audio.
+        Separate the background noise from the audio.
 
         Args:
             audio (Union[str, np.ndarray]): Audio path or numpy array.
@@ -130,7 +130,7 @@ class MusicSeparator:
             )
             self.model.sample_rate = sample_rate
 
-        progress(0, desc="Separating background music from the audio.. "
+        progress(0, desc="Separating background noise from the audio.. "
                          "(It will only display 0% until the job is complete.) ")
         result = self.model(audio)
         instrumental, vocals = result["instrumental"].T, result["vocals"].T
@@ -152,7 +152,7 @@ class MusicSeparator:
                        segment_size: int = 256,
                        save_file: bool = True,
                        progress: gr.Progress = gr.Progress()) -> List[str]:
-        """Separate the background music from the audio files. Returns only last Instrumental and vocals file paths
+        """Separate the background noise from the audio files. Returns only last Background and Voice file paths
         to display into gr.Audio()"""
         self.cache_parameters(model_size=model_name, segment_size=segment_size)
 

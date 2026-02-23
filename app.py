@@ -80,7 +80,7 @@ class App:
                                                             available_compute_types=self.whisper_inf.available_compute_types,
                                                             compute_type=self.whisper_inf.current_compute_type)
 
-        with gr.Accordion(_("Background Music Remover Filter"), open=False):
+        with gr.Accordion(_("Background Noise Remover Filter"), open=False):
             uvr_inputs = BGMSeparationParams.to_gradio_input(defaults=uvr_params,
                                                              available_models=self.whisper_inf.music_separator.available_models,
                                                              available_devices=self.whisper_inf.music_separator.available_devices,
@@ -287,7 +287,7 @@ class App:
                                       outputs=[tb_indicator, files_subtitles])
 
                     with gr.TabItem(_("BGM Separation")):
-                        files_audio = gr.Files(type="filepath", label=_("Upload Audio Files to separate background music"))
+                        files_audio = gr.Files(type="filepath", label=_("Upload Audio Files to separate background noise"))
                         dd_uvr_device = gr.Dropdown(label=_("Device"), value=self.whisper_inf.music_separator.device,
                                                     choices=self.whisper_inf.music_separator.available_devices)
                         dd_uvr_model_size = gr.Dropdown(label=_("Model"), value=uvr_params["uvr_model_size"],
@@ -296,29 +296,29 @@ class App:
                                                         precision=0)
                         cb_uvr_save_file = gr.Checkbox(label=_("Save separated files to output"),
                                                        value=True, visible=False)
-                        btn_run = gr.Button(_("SEPARATE BACKGROUND MUSIC"), variant="primary")
+                        btn_run = gr.Button(_("SEPARATE BACKGROUND NOISE"), variant="primary")
                         with gr.Column():
                             with gr.Row():
-                                ad_instrumental = gr.Audio(label=_("Instrumental"), scale=8)
-                                btn_open_instrumental_folder = gr.Button('📂', scale=1)
+                                ad_instrumental = gr.Audio(label=_("Background"), scale=8)
+                                btn_download_instrumental = gr.DownloadButton(
+                                    value=App.audio_file_for_download,
+                                    inputs=[ad_instrumental],
+                                    label='📂',
+                                    scale=1,
+                                )
                             with gr.Row():
-                                ad_vocals = gr.Audio(label=_("Vocals"), scale=8)
-                                btn_open_vocals_folder = gr.Button('📂', scale=1)
+                                ad_vocals = gr.Audio(label=_("Voice"), scale=8)
+                                btn_download_vocals = gr.DownloadButton(
+                                    value=App.audio_file_for_download,
+                                    inputs=[ad_vocals],
+                                    label='📂',
+                                    scale=1,
+                                )
 
                         btn_run.click(fn=self.whisper_inf.music_separator.separate_files,
                                       inputs=[files_audio, dd_uvr_model_size, dd_uvr_device, nb_uvr_segment_size,
                                               cb_uvr_save_file],
                                       outputs=[ad_instrumental, ad_vocals])
-                        btn_open_instrumental_folder.click(inputs=None,
-                                                           outputs=None,
-                                                           fn=lambda: self.open_folder(os.path.join(
-                                                               self.args.output_dir, "UVR", "instrumental"
-                                                           )))
-                        btn_open_vocals_folder.click(inputs=None,
-                                                     outputs=None,
-                                                     fn=lambda: self.open_folder(os.path.join(
-                                                         self.args.output_dir, "UVR", "vocals"
-                                                     )))
 
         # Launch the app with optional gradio settings
         args = self.args
@@ -353,6 +353,19 @@ class App:
             return first
         if isinstance(first, dict):
             path = first.get("path") or first.get("name")
+            if path and os.path.isfile(path):
+                return path
+        return None
+
+    @staticmethod
+    def audio_file_for_download(audio_value) -> Optional[str]:
+        """Get file path from gr.Audio value for DownloadButton. Returns None if empty."""
+        if not audio_value:
+            return None
+        if isinstance(audio_value, str) and os.path.isfile(audio_value):
+            return audio_value
+        if isinstance(audio_value, dict):
+            path = audio_value.get("path") or audio_value.get("name")
             if path and os.path.isfile(path):
                 return path
         return None

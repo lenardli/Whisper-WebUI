@@ -53,10 +53,21 @@ en:
   T2T Translation: T2T Translation
   Upload Audio Files to separate background music: Upload Audio Files to separate
     background music
+  Upload Audio Files to separate background noise: Upload Audio Files to separate background noise
   SEPARATE BACKGROUND MUSIC: SEPARATE BACKGROUND MUSIC
+  SEPARATE BACKGROUND NOISE: SEPARATE BACKGROUND NOISE
   Instrumental: Instrumental
   Vocals: Vocals
-  BGM Separation: BGM Separation
+  Background: Background
+  Voice: Voice
+  Background Music Remover Filter: Background Music Remover Filter
+  Background Noise Remover Filter: Background Noise Remover Filter
+  Enable Background Music Remover Filter: Enable Background Music Remover Filter
+  Enable Background Noise Remover Filter: Enable Background Noise Remover Filter
+  Enabling this will remove background music: Enabling this will remove background
+    music by submodel before transcribing
+  Enabling this will remove background noise: Enabling this will remove background noise
+  BGM Separation: Background Noise Separation
 ko:
   Language: 언어
   Upload File here: 파일을 업로드 하세요
@@ -102,10 +113,17 @@ ko:
   NLLB: NLLB
   T2T Translation: T2T 자막 번역
   Upload Audio Files to separate background music: 배경 음악을 분리할 오디오 파일을 업로드 하세요
+  Upload Audio Files to separate background noise: 배경 소음을 분리할 오디오 파일을 업로드 하세요
   SEPARATE BACKGROUND MUSIC: 배경 음악 분리
+  SEPARATE BACKGROUND NOISE: 배경 소음 분리
   Instrumental: 악기
   Vocals: 보컬
-  BGM Separation: 배경 음악 분리
+  Background: 배경
+  Voice: 보컬
+  Background Noise Remover Filter: 배경 소음 제거 필터
+  Enable Background Noise Remover Filter: 배경 소음 제거 필터 활성화
+  Enabling this will remove background noise: 활성화 시 트랜스크립션 전 서브모델로 배경 소음을 제거합니다.
+  BGM Separation: 배경 소음 분리
 ja:
   Language: 言語
   Upload File here: Upload File here
@@ -155,9 +173,16 @@ ja:
   T2T Translation: T2T Translation
   Upload Audio Files to separate background music: Upload Audio Files to separate
     background music
+  Upload Audio Files to separate background noise: Upload Audio Files to separate background noise
   SEPARATE BACKGROUND MUSIC: SEPARATE BACKGROUND MUSIC
+  SEPARATE BACKGROUND NOISE: SEPARATE BACKGROUND NOISE
   Instrumental: Instrumental
   Vocals: Vocals
+  Background: Background
+  Voice: Voice
+  Background Noise Remover Filter: Background Noise Remover Filter
+  Enable Background Noise Remover Filter: Enable Background Noise Remover Filter
+  Enabling this will remove background noise: Enabling this will remove background noise
   BGM Separation: BGM Separation
 es:
   Language: Idioma
@@ -208,10 +233,17 @@ es:
   T2T Translation: T2T Translation
   Upload Audio Files to separate background music: Upload Audio Files to separate
     background music
+  Upload Audio Files to separate background noise: Subir archivos de audio para separar el ruido de fondo
   SEPARATE BACKGROUND MUSIC: SEPARATE BACKGROUND MUSIC
+  SEPARATE BACKGROUND NOISE: SEPARAR RUIDO DE FONDO
   Instrumental: Instrumental
   Vocals: Vocals
-  BGM Separation: BGM Separation
+  Background: Fondo
+  Voice: Voz
+  Background Noise Remover Filter: Filtro de eliminación de ruido de fondo
+  Enable Background Noise Remover Filter: Activar filtro de eliminación de ruido de fondo
+  Enabling this will remove background noise: Al activar se eliminará el ruido de fondo
+  BGM Separation: Separación de ruido de fondo
 fr:
   Language: Langue
   Upload File here: Téléverser un fichier ici
@@ -265,10 +297,17 @@ fr:
   T2T Translation: Traduction T2T
   Upload Audio Files to separate background music: Téléverser les fichiers audio pour
     séparer la musique de fond
+  Upload Audio Files to separate background noise: Téléverser les fichiers audio pour séparer le bruit de fond
   SEPARATE BACKGROUND MUSIC: SÉPARER LA MUSIQUE DE FOND
+  SEPARATE BACKGROUND NOISE: SÉPARER LE BRUIT DE FOND
   Instrumental: Instrumental
   Vocals: Voix
-  BGM Separation: Séparation de la musique de fond
+  Background: Fond
+  Voice: Voix
+  Background Noise Remover Filter: Filtre de suppression du bruit de fond
+  Enable Background Noise Remover Filter: Activer le filtre de suppression du bruit de fond
+  Enabling this will remove background noise: L'activation supprimera le bruit de fond
+  BGM Separation: Séparation du bruit de fond
 de:
   Language: Sprache
   Upload File here: Datei hier hochladen
@@ -320,10 +359,17 @@ de:
   T2T Translation: Text zu Text Übersetzung
   Upload Audio Files to separate background music: Audiodateien hochladen, um Hintergrundmusik
     zu trennen
+  Upload Audio Files to separate background noise: Audiodateien hochladen, um Hintergrundgeräusche zu trennen
   SEPARATE BACKGROUND MUSIC: HINTERGRUNDMUSIK TRENNEN
+  SEPARATE BACKGROUND NOISE: HINTERGRUNDGERÄUSCHE TRENNEN
   Instrumental: Instrumental
   Vocals: Gesang
-  BGM Separation: Hintergrundmusik herausfiltern
+  Background: Hintergrund
+  Voice: Stimme
+  Background Noise Remover Filter: Filter zur Entfernung von Hintergrundgeräuschen
+  Enable Background Noise Remover Filter: Filter zur Entfernung von Hintergrundgeräuschen aktivieren
+  Enabling this will remove background noise: Aktivierung entfernt Hintergrundgeräusche
+  BGM Separation: Hintergrundgeräusch-Trennung
 nl:
   Language: Taal
   Upload File here: Upload Bestand Hier
@@ -371,10 +417,17 @@ nl:
   NLLB: NLLB
   T2T Translation: T2T Vertaling
   Upload Audio Files to separate background music: Audiobestanden uploaden, om achtergrondmuziek te scheiden
+  Upload Audio Files to separate background noise: Audiobestanden uploaden om achtergrondgeluid te scheiden
   SEPARATE BACKGROUND MUSIC: ACHTERGRONDMUZIEK SCHEIDEN
+  SEPARATE BACKGROUND NOISE: ACHTERGRONDGELUID SCHEIDEN
   Instrumental: Instrumenteel
   Vocals: Stemmen
-  BGM Separation: BGM Separatie
+  Background: Achtergrond
+  Voice: Stem
+  Background Noise Remover Filter: Filter voor verwijdering achtergrondgeluid
+  Enable Background Noise Remover Filter: Filter voor verwijdering achtergrondgeluid inschakelen
+  Enabling this will remove background noise: Hiermee wordt achtergrondgeluid verwijderd
+  BGM Separation: Achtergrondgeluid scheiden
 zh:
   Language: 语言
   Upload File here: 上传文件
@@ -420,10 +473,17 @@ zh:
   NLLB: NLLB
   T2T Translation: 文字翻译
   Upload Audio Files to separate background music: 上传待分离背景音乐的音频文件
+  Upload Audio Files to separate background noise: 上传待分离背景噪音的音频文件
   SEPARATE BACKGROUND MUSIC: 分离背景音乐与人声
+  SEPARATE BACKGROUND NOISE: 分离背景噪音
   Instrumental: 器乐声
   Vocals: 人声
-  BGM Separation: 背景音乐分离
+  Background: 背景
+  Voice: 人声
+  Background Noise Remover Filter: 背景噪音消除设置
+  Enable Background Noise Remover Filter: 去除背景噪音
+  Enabling this will remove background noise: 启用此功能将会在进行转录前去除背景噪音
+  BGM Separation: 背景噪音分离
 uk:
   Language: Мова
   Upload File here: Завантажте файл тут
@@ -474,10 +534,17 @@ uk:
   T2T Translation: T2T Переклад
   Upload Audio Files to separate background music: Завантажте аудіофайли для розділення
     фонової музики
+  Upload Audio Files to separate background noise: Завантажте аудіофайли для розділення фонового шуму
   SEPARATE BACKGROUND MUSIC: РОЗДІЛИТИ ФОНОВУ МУЗИКУ
+  SEPARATE BACKGROUND NOISE: РОЗДІЛИТИ ФОНОВИЙ ШУМ
   Instrumental: Інструментал
   Vocals: Вокал
-  BGM Separation: Розділення фонової музики
+  Background: Фон
+  Voice: Голос
+  Background Noise Remover Filter: Фільтр видалення фонового шуму
+  Enable Background Noise Remover Filter: Увімкнути фільтр видалення фонового шуму
+  Enabling this will remove background noise: Увімкнення цього видалить фоновий шум
+  BGM Separation: Розділення фонового шуму
 ru:
   Language: Язык
   Upload File here: Загрузите файл здесь
@@ -534,10 +601,21 @@ ru:
   T2T Translation: Перевод T2T
   Upload Audio Files to separate background music: Загрузите аудиофайлы для разделения
     фоновой музыки
+  Upload Audio Files to separate background noise: Загрузите аудиофайлы для разделения фонового шума
   SEPARATE BACKGROUND MUSIC: РАЗДЕЛИТЬ ФОНОВУЮ МУЗЫКУ
+  SEPARATE BACKGROUND NOISE: РАЗДЕЛИТЬ ФОНОВЫЙ ШУМ
   Instrumental: Инструментал
   Vocals: Вокал
-  BGM Separation: Разделение фоновой музыки
+  Background: Фон
+  Voice: Голос
+  Background Music Remover Filter: Фильтр удаления фоновой музыки
+  Background Noise Remover Filter: Фильтр удаления фонового шума
+  Enable Background Music Remover Filter: Включить фильтр удаления фоновой музыки
+  Enable Background Noise Remover Filter: Включить фильтр удаления фонового шума
+  Enabling this will remove background music: Включение этого удалит фоновую музыку
+    с помощью подмодели перед транскрипцией
+  Enabling this will remove background noise: Включение этого удалит фоновый шум
+  BGM Separation: Разделение фонового шума
 tr:
   Language: Dil
   Upload File here: Dosya Yükle
@@ -588,10 +666,17 @@ tr:
   T2T Translation: T2T Çeviri
   Upload Audio Files to separate background music: Arka plan müziğini ayırmak için
     ses dosyalarını yükle
+  Upload Audio Files to separate background noise: Arka plan gürültüsünü ayırmak için ses dosyalarını yükle
   SEPARATE BACKGROUND MUSIC: ARKA PLAN MÜZİĞİNİ AYIR
+  SEPARATE BACKGROUND NOISE: ARKA PLAN GÜRÜLTÜSÜNÜ AYIR
   Instrumental: Enstrümantal
   Vocals: Vokal
-  BGM Separation: Arka Plan Müziği Ayırma
+  Background: Arka plan
+  Voice: Ses
+  Background Noise Remover Filter: Arka plan gürültüsü kaldırma filtresi
+  Enable Background Noise Remover Filter: Arka plan gürültüsü kaldırma filtresini etkinleştir
+  Enabling this will remove background noise: Etkinleştirmek arka plan gürültüsünü kaldırır
+  BGM Separation: Arka plan gürültüsü ayırma
 eu:
   Language: Hizkuntza
   Upload File here: Igo fitxategia hemen
@@ -641,10 +726,17 @@ eu:
   T2T Translation: T2T Itzulketak
   Upload Audio Files to separate background music: Igo Audio Fitxategiak atzeko musika
     bereizteko
+  Upload Audio Files to separate background noise: Igo audio fitxategiak atzeko zarata bereizteko
   SEPARATE BACKGROUND MUSIC: BEREIZI ATZEKO MUSIKA
+  SEPARATE BACKGROUND NOISE: BEREIZI ATZEKO ZARATA
   Instrumental: Instrumentala
   Vocals: Ahotsak
-  BGM Separation: BGM Bereizpena
+  Background: Atzealdea
+  Voice: Ahotsa
+  Background Noise Remover Filter: Atzeko Zarata Ezabatzeko Filtroa
+  Enable Background Noise Remover Filter: Aktibatu Atzeko Zarata Ezabatzeko Filtroa
+  Enabling this will remove background noise: Hau aktibatuz atzeko zarata ezabatuko da
+  BGM Separation: Atzeko zarata bereiztea
 he: # Hebrew
   Language: שפה
   File: קובץ
@@ -687,9 +779,16 @@ he: # Hebrew
   Pro User?: משתמש פרו?
   TRANSLATE SUBTITLE FILE: תרגם קובץ כתוביות
   Upload Audio Files to separate background music: העלה קבצי שמע להפרדת מוזיקת רקע
+  Upload Audio Files to separate background noise: העלה קבצי שמע להפרדת רעש רקע
   Instrumental: אינסטרומנטלי
   Vocals: שירה
+  Background: רקע
+  Voice: קול
+  Background Noise Remover Filter: מסנן הסרת רעש רקע
+  Enable Background Noise Remover Filter: אפשר מסנן הסרת רעש רקע
+  Enabling this will remove background noise: הפעלה תסיר רעש רקע
   SEPARATE BACKGROUND MUSIC: הפרד מוזיקת רקע
+  SEPARATE BACKGROUND NOISE: הפרד רעש רקע
 zh-TW:
   Language: 語言
   Upload File here: 在此處上傳檔案

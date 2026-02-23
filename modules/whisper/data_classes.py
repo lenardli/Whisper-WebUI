@@ -194,8 +194,8 @@ class DiarizationParams(BaseParams):
 
 
 class BGMSeparationParams(BaseParams):
-    """Background music separation parameters"""
-    is_separate_bgm: bool = Field(default=False, description="Enable background music separation")
+    """Background noise separation parameters"""
+    is_separate_bgm: bool = Field(default=False, description="Enable background noise separation")
     uvr_model_size: str = Field(
         default="UVR-MDX-NET-Inst_HQ_4",
         description="UVR model size"
@@ -223,10 +223,10 @@ class BGMSeparationParams(BaseParams):
                         available_models: Optional[List] = None) -> List[gr.components.base.FormComponent]:
         return [
             gr.Checkbox(
-                label=_("Enable Background Music Remover Filter"),
+                label=_("Enable Background Noise Remover Filter"),
                 value=defaults.get("is_separate_bgm", cls.__fields__["is_separate_bgm"].default),
                 interactive=True,
-                info=_("Enabling this will remove background music")
+                info=_("Enabling this will remove background noise")
             ),
             gr.Dropdown(
                 label=_("Model"),
