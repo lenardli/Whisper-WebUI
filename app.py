@@ -28,6 +28,9 @@ logger = get_logger()
 class App:
     def __init__(self, args):
         self.args = args
+        # Serve result files directly from output_dir (no cache copy) to reduce download timeouts
+        output_dir_abs = os.path.abspath(args.output_dir)
+        gr.set_static_paths(paths=[output_dir_abs])
         # Check every 1 hour (3600) for cached files and delete them if older than 1 day (86400)
         self.app = gr.Blocks(css=CSS, theme=self.args.theme, delete_cache=(3600, 86400))
         self.whisper_inf = WhisperFactory.create_whisper_inference(
