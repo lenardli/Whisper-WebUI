@@ -321,7 +321,7 @@ class App:
                         btn_run = gr.Button(_("SEPARATE BACKGROUND NOISE"), variant="primary")
                         with gr.Column():
                             with gr.Row():
-                                ad_instrumental = gr.Audio(label=_("Background"), scale=8)
+                                ad_instrumental = gr.Audio(label=_("Background"), scale=8, interactive=False)
                                 btn_download_instrumental = gr.DownloadButton(
                                     value=App.audio_file_for_download,
                                     inputs=[ad_instrumental],
@@ -329,7 +329,7 @@ class App:
                                     scale=1,
                                 )
                             with gr.Row():
-                                ad_vocals = gr.Audio(label=_("Voice"), scale=8)
+                                ad_vocals = gr.Audio(label=_("Voice"), scale=8, interactive=False)
                                 btn_download_vocals = gr.DownloadButton(
                                     value=App.audio_file_for_download,
                                     inputs=[ad_vocals],

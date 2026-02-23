@@ -595,9 +595,9 @@ ru:
   T2T Translation: Перевод T2T
   Upload Audio Files to separate background music: Загрузите аудиофайлы для разделения
     фоновой музыки
-  Upload Audio Files to separate background noise: Загрузите аудиофайлы для разделения фонового шума
+  Upload Audio Files to separate background noise: Загрузите аудиофайлы для отделения фонового шума
   SEPARATE BACKGROUND MUSIC: РАЗДЕЛИТЬ ФОНОВУЮ МУЗЫКУ
-  SEPARATE BACKGROUND NOISE: РАЗДЕЛИТЬ ФОНОВЫЙ ШУМ
+  SEPARATE BACKGROUND NOISE: ОТДЕЛИТЬ ФОНОВЫЙ ШУМ
   Instrumental: Инструментал
   Vocals: Вокал
   Background: Фон
@@ -605,7 +605,7 @@ ru:
   Background Noise Remover Filter: Фильтр удаления фонового шума
   Enable Background Noise Remover Filter: Включить фильтр удаления фонового шума
   Enabling this will remove background noise: Включение этого удалит фоновый шум
-  BGM Separation: Разделение фонового шума
+  BGM Separation: Отделение фонового шума
 tr:
   Language: Dil
   Upload File here: Dosya Yükle
