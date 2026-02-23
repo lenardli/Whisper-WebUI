@@ -2,6 +2,7 @@ import os
 import argparse
 import platform
 import subprocess
+from typing import Optional
 import gradio as gr
 from gradio_i18n import Translate, gettext as _
 import yaml
@@ -137,6 +138,7 @@ class App:
                             tb_indicator = gr.Textbox(label=_("Output"), scale=5)
                             files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3, interactive=False)
                             btn_openfolder = gr.Button('📂', scale=1)
+                            download_subtitle_file = gr.DownloadButton(visible=False, elem_id="download_subtitle_file")
 
                         params = [input_file, tb_input_folder, cb_include_subdirectory, cb_save_same_dir,
                                   dd_file_format, cb_timestamp]
@@ -145,9 +147,12 @@ class App:
                                       inputs=params,
                                       outputs=[tb_indicator, files_subtitles])
                         btn_openfolder.click(
-                            fn=lambda: self.open_folder(self.args.output_dir),
-                            inputs=None,
-                            outputs=None,
+                            fn=App.first_file_for_download,
+                            inputs=[files_subtitles],
+                            outputs=[download_subtitle_file],
+                        ).then(
+                            fn=None,
+                            js="() => { const el = document.querySelector('#download_subtitle_file a, #download_subtitle_file button'); if (el) el.click(); }",
                         )
 
                     with gr.TabItem(_("Rutube")):  # tab2
@@ -168,6 +173,7 @@ class App:
                             tb_indicator = gr.Textbox(label=_("Output"), scale=5)
                             files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
                             btn_openfolder = gr.Button('📂', scale=1)
+                            download_subtitle_rutube = gr.DownloadButton(visible=False, elem_id="download_subtitle_rutube")
 
                         params = [tb_rutubelink, dd_file_format, cb_timestamp]
 
@@ -177,9 +183,12 @@ class App:
                         tb_rutubelink.change(get_rutube_metas, inputs=[tb_rutubelink],
                                              outputs=[img_thumbnail, tb_title, tb_description])
                         btn_openfolder.click(
-                            fn=lambda: self.open_folder(self.args.output_dir),
-                            inputs=None,
-                            outputs=None,
+                            fn=App.first_file_for_download,
+                            inputs=[files_subtitles],
+                            outputs=[download_subtitle_rutube],
+                        ).then(
+                            fn=None,
+                            js="() => { const el = document.querySelector('#download_subtitle_rutube a, #download_subtitle_rutube button'); if (el) el.click(); }",
                         )
 
                     with gr.TabItem(_("Mic")):  # tab3
@@ -195,6 +204,7 @@ class App:
                             tb_indicator = gr.Textbox(label=_("Output"), scale=5)
                             files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
                             btn_openfolder = gr.Button('📂', scale=1)
+                            download_subtitle_mic = gr.DownloadButton(visible=False, elem_id="download_subtitle_mic")
 
                         params = [mic_input, dd_file_format, cb_timestamp]
 
@@ -202,9 +212,12 @@ class App:
                                       inputs=params + pipeline_params,
                                       outputs=[tb_indicator, files_subtitles])
                         btn_openfolder.click(
-                            fn=lambda: self.open_folder(self.args.output_dir),
-                            inputs=None,
-                            outputs=None,
+                            fn=App.first_file_for_download,
+                            inputs=[files_subtitles],
+                            outputs=[download_subtitle_mic],
+                        ).then(
+                            fn=None,
+                            js="() => { const el = document.querySelector('#download_subtitle_mic a, #download_subtitle_mic button'); if (el) el.click(); }",
                         )
 
                     with gr.TabItem(_("T2T Translation")):  # tab 4
@@ -235,6 +248,7 @@ class App:
                                 tb_indicator = gr.Textbox(label=_("Output"), scale=5)
                                 files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
                                 btn_openfolder = gr.Button('📂', scale=1)
+                                download_subtitle_deepl = gr.DownloadButton(visible=False, elem_id="download_subtitle_deepl")
 
                         btn_run.click(fn=self.deepl_api.translate_deepl,
                                       inputs=[tb_api_key, file_subs, dd_source_lang, dd_target_lang,
@@ -242,9 +256,13 @@ class App:
                                       outputs=[tb_indicator, files_subtitles])
 
                         btn_openfolder.click(
-                            fn=lambda: self.open_folder(os.path.join(self.args.output_dir, "translations")),
-                            inputs=None,
-                            outputs=None)
+                            fn=App.first_file_for_download,
+                            inputs=[files_subtitles],
+                            outputs=[download_subtitle_deepl],
+                        ).then(
+                            fn=None,
+                            js="() => { const el = document.querySelector('#download_subtitle_deepl a, #download_subtitle_deepl button'); if (el) el.click(); }",
+                        )
 
                         with gr.TabItem(_("NLLB")):  # sub tab2
                             with gr.Row():
@@ -269,6 +287,7 @@ class App:
                                 tb_indicator = gr.Textbox(label=_("Output"), scale=5)
                                 files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
                                 btn_openfolder = gr.Button('📂', scale=1)
+                                download_subtitle_nllb = gr.DownloadButton(visible=False, elem_id="download_subtitle_nllb")
                             with gr.Column():
                                 md_vram_table = gr.HTML(NLLB_VRAM_TABLE, elem_id="md_nllb_vram_table")
 
@@ -278,9 +297,13 @@ class App:
                                       outputs=[tb_indicator, files_subtitles])
 
                         btn_openfolder.click(
-                            fn=lambda: self.open_folder(os.path.join(self.args.output_dir, "translations")),
-                            inputs=None,
-                            outputs=None)
+                            fn=App.first_file_for_download,
+                            inputs=[files_subtitles],
+                            outputs=[download_subtitle_nllb],
+                        ).then(
+                            fn=None,
+                            js="() => { const el = document.querySelector('#download_subtitle_nllb a, #download_subtitle_nllb button'); if (el) el.click(); }",
+                        )
 
                     with gr.TabItem(_("BGM Separation")):
                         files_audio = gr.Files(type="filepath", label=_("Upload Audio Files to separate background music"))
@@ -338,6 +361,20 @@ class App:
             ),
             show_api=False  # Hide "Использовать через API" link
         )
+
+    @staticmethod
+    def first_file_for_download(files_value) -> Optional[str]:
+        """Get first file path from gr.Files value for DownloadButton. Returns None if empty."""
+        if not files_value:
+            return None
+        first = files_value[0] if isinstance(files_value, list) else files_value
+        if isinstance(first, str) and os.path.isfile(first):
+            return first
+        if isinstance(first, dict):
+            path = first.get("path") or first.get("name")
+            if path and os.path.isfile(path):
+                return path
+        return None
 
     @staticmethod
     def open_folder(folder_path: str) -> None:
