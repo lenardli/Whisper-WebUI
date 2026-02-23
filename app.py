@@ -137,8 +137,12 @@ class App:
                         with gr.Row():
                             tb_indicator = gr.Textbox(label=_("Output"), scale=5)
                             files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3, interactive=False)
-                            btn_openfolder = gr.Button('📂', scale=1)
-                            download_subtitle_file = gr.DownloadButton(visible=False, elem_id="download_subtitle_file")
+                            btn_openfolder = gr.DownloadButton(
+                                value=App.first_file_for_download,
+                                inputs=[files_subtitles],
+                                label='📂',
+                                scale=1,
+                            )
 
                         params = [input_file, tb_input_folder, cb_include_subdirectory, cb_save_same_dir,
                                   dd_file_format, cb_timestamp]
@@ -146,14 +150,6 @@ class App:
                         btn_run.click(fn=self.whisper_inf.transcribe_file,
                                       inputs=params,
                                       outputs=[tb_indicator, files_subtitles])
-                        btn_openfolder.click(
-                            fn=App.first_file_for_download,
-                            inputs=[files_subtitles],
-                            outputs=[download_subtitle_file],
-                        ).then(
-                            fn=None,
-                            js="() => { const el = document.querySelector('#download_subtitle_file a, #download_subtitle_file button'); if (el) el.click(); }",
-                        )
 
                     with gr.TabItem(_("Rutube")):  # tab2
                         with gr.Row():
@@ -172,8 +168,12 @@ class App:
                         with gr.Row():
                             tb_indicator = gr.Textbox(label=_("Output"), scale=5)
                             files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
-                            btn_openfolder = gr.Button('📂', scale=1)
-                            download_subtitle_rutube = gr.DownloadButton(visible=False, elem_id="download_subtitle_rutube")
+                            btn_openfolder = gr.DownloadButton(
+                                value=App.first_file_for_download,
+                                inputs=[files_subtitles],
+                                label='📂',
+                                scale=1,
+                            )
 
                         params = [tb_rutubelink, dd_file_format, cb_timestamp]
 
@@ -182,14 +182,6 @@ class App:
                                       outputs=[tb_indicator, files_subtitles])
                         tb_rutubelink.change(get_rutube_metas, inputs=[tb_rutubelink],
                                              outputs=[img_thumbnail, tb_title, tb_description])
-                        btn_openfolder.click(
-                            fn=App.first_file_for_download,
-                            inputs=[files_subtitles],
-                            outputs=[download_subtitle_rutube],
-                        ).then(
-                            fn=None,
-                            js="() => { const el = document.querySelector('#download_subtitle_rutube a, #download_subtitle_rutube button'); if (el) el.click(); }",
-                        )
 
                     with gr.TabItem(_("Mic")):  # tab3
                         with gr.Row():
@@ -203,22 +195,18 @@ class App:
                         with gr.Row():
                             tb_indicator = gr.Textbox(label=_("Output"), scale=5)
                             files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
-                            btn_openfolder = gr.Button('📂', scale=1)
-                            download_subtitle_mic = gr.DownloadButton(visible=False, elem_id="download_subtitle_mic")
+                            btn_openfolder = gr.DownloadButton(
+                                value=App.first_file_for_download,
+                                inputs=[files_subtitles],
+                                label='📂',
+                                scale=1,
+                            )
 
                         params = [mic_input, dd_file_format, cb_timestamp]
 
                         btn_run.click(fn=self.whisper_inf.transcribe_mic,
                                       inputs=params + pipeline_params,
                                       outputs=[tb_indicator, files_subtitles])
-                        btn_openfolder.click(
-                            fn=App.first_file_for_download,
-                            inputs=[files_subtitles],
-                            outputs=[download_subtitle_mic],
-                        ).then(
-                            fn=None,
-                            js="() => { const el = document.querySelector('#download_subtitle_mic a, #download_subtitle_mic button'); if (el) el.click(); }",
-                        )
 
                     with gr.TabItem(_("T2T Translation")):  # tab 4
                         with gr.Row():
@@ -247,22 +235,17 @@ class App:
                             with gr.Row():
                                 tb_indicator = gr.Textbox(label=_("Output"), scale=5)
                                 files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
-                                btn_openfolder = gr.Button('📂', scale=1)
-                                download_subtitle_deepl = gr.DownloadButton(visible=False, elem_id="download_subtitle_deepl")
+                                btn_openfolder = gr.DownloadButton(
+                                    value=App.first_file_for_download,
+                                    inputs=[files_subtitles],
+                                    label='📂',
+                                    scale=1,
+                                )
 
                         btn_run.click(fn=self.deepl_api.translate_deepl,
                                       inputs=[tb_api_key, file_subs, dd_source_lang, dd_target_lang,
                                               cb_is_pro, cb_timestamp],
                                       outputs=[tb_indicator, files_subtitles])
-
-                        btn_openfolder.click(
-                            fn=App.first_file_for_download,
-                            inputs=[files_subtitles],
-                            outputs=[download_subtitle_deepl],
-                        ).then(
-                            fn=None,
-                            js="() => { const el = document.querySelector('#download_subtitle_deepl a, #download_subtitle_deepl button'); if (el) el.click(); }",
-                        )
 
                         with gr.TabItem(_("NLLB")):  # sub tab2
                             with gr.Row():
@@ -286,8 +269,12 @@ class App:
                             with gr.Row():
                                 tb_indicator = gr.Textbox(label=_("Output"), scale=5)
                                 files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
-                                btn_openfolder = gr.Button('📂', scale=1)
-                                download_subtitle_nllb = gr.DownloadButton(visible=False, elem_id="download_subtitle_nllb")
+                                btn_openfolder = gr.DownloadButton(
+                                    value=App.first_file_for_download,
+                                    inputs=[files_subtitles],
+                                    label='📂',
+                                    scale=1,
+                                )
                             with gr.Column():
                                 md_vram_table = gr.HTML(NLLB_VRAM_TABLE, elem_id="md_nllb_vram_table")
 
@@ -295,15 +282,6 @@ class App:
                                       inputs=[file_subs, dd_model_size, dd_source_lang, dd_target_lang,
                                               nb_max_length, cb_timestamp],
                                       outputs=[tb_indicator, files_subtitles])
-
-                        btn_openfolder.click(
-                            fn=App.first_file_for_download,
-                            inputs=[files_subtitles],
-                            outputs=[download_subtitle_nllb],
-                        ).then(
-                            fn=None,
-                            js="() => { const el = document.querySelector('#download_subtitle_nllb a, #download_subtitle_nllb button'); if (el) el.click(); }",
-                        )
 
                     with gr.TabItem(_("BGM Separation")):
                         files_audio = gr.Files(type="filepath", label=_("Upload Audio Files to separate background music"))
