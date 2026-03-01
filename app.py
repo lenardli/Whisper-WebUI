@@ -29,20 +29,25 @@ logger = get_logger()
 
 
 def _clean_old_download_copies(directory: str, max_age_sec: int = 300) -> None:
-    """Remove temporary download copies older than max_age_sec in directory."""
+    """Remove temporary download copies older than max_age_sec in directory.
+    Handles both legacy 'download_*' files and uuid-named subdirs containing the copy."""
     if not os.path.isdir(directory):
         return
     now = time.time()
     try:
         for name in os.listdir(directory):
-            if not name.startswith("download_"):
-                continue
             path = os.path.join(directory, name)
-            if os.path.isfile(path) and (now - os.path.getmtime(path)) > max_age_sec:
+            if os.path.isfile(path) and name.startswith("download_") and (now - os.path.getmtime(path)) > max_age_sec:
                 try:
                     os.remove(path)
                 except OSError:
                     pass
+            elif os.path.isdir(path) and len(name) == 32 and all(c in "0123456789abcdef" for c in name.lower()):
+                if (now - os.path.getmtime(path)) > max_age_sec:
+                    try:
+                        shutil.rmtree(path, ignore_errors=True)
+                    except OSError:
+                        pass
     except OSError:
         pass
 
@@ -319,28 +324,36 @@ class App:
                         cb_uvr_save_file = gr.Checkbox(label=_("Save separated files to output"),
                                                        value=True, visible=False)
                         btn_run = gr.Button(_("SEPARATE BACKGROUND NOISE"), variant="primary")
+                        state_instrumental_path = gr.State(value=None)
+                        state_vocals_path = gr.State(value=None)
                         with gr.Column():
                             with gr.Row():
                                 ad_instrumental = gr.Audio(label=_("Background"), scale=8, interactive=False)
                                 btn_download_instrumental = gr.DownloadButton(
-                                    value=App.audio_file_for_download,
-                                    inputs=[ad_instrumental],
-                                    label='📂 ' + _("фон"),
+                                    value=App.path_from_state_for_download,
+                                    inputs=[state_instrumental_path],
+                                    label='📂',
                                     scale=1,
                                 )
                             with gr.Row():
                                 ad_vocals = gr.Audio(label=_("Voice"), scale=8, interactive=False)
                                 btn_download_vocals = gr.DownloadButton(
-                                    value=App.audio_file_for_download,
-                                    inputs=[ad_vocals],
-                                    label='📂 ' + _("голос"),
+                                    value=App.path_from_state_for_download,
+                                    inputs=[state_vocals_path],
+                                    label='📂',
                                     scale=1,
                                 )
 
-                        btn_run.click(fn=self.whisper_inf.music_separator.separate_files,
+                        def bgm_separation_outputs(*args):
+                            paths = self.whisper_inf.music_separator.separate_files(*args)
+                            if not paths or len(paths) < 2:
+                                return None, None, None, None
+                            return paths[0], paths[1], paths[0], paths[1]
+
+                        btn_run.click(fn=bgm_separation_outputs,
                                       inputs=[files_audio, dd_uvr_model_size, dd_uvr_device, nb_uvr_segment_size,
                                               cb_uvr_save_file],
-                                      outputs=[ad_instrumental, ad_vocals])
+                                      outputs=[ad_instrumental, ad_vocals, state_instrumental_path, state_vocals_path])
 
         # Launch the app with optional gradio settings
         args = self.args
@@ -367,7 +380,7 @@ class App:
 
     @staticmethod
     def _path_for_download(path: str) -> Optional[str]:
-        """Copy file to a unique path and return it, so each download gets a fresh URL (avoids Gradio cache/URL reuse)."""
+        """Copy file to a unique path but keep original basename so the downloaded file has the same name as the source."""
         if not path or not os.path.isfile(path):
             return None
         base = os.path.basename(path)
@@ -377,9 +390,10 @@ class App:
             os.makedirs(download_dir, exist_ok=True)
         except OSError:
             download_dir = parent
-        unique_name = f"download_{uuid.uuid4().hex}_{base}"
-        dest = os.path.join(download_dir, unique_name)
+        unique_subdir = os.path.join(download_dir, uuid.uuid4().hex)
         try:
+            os.makedirs(unique_subdir, exist_ok=True)
+            dest = os.path.join(unique_subdir, base)
             shutil.copy2(path, dest)
             _clean_old_download_copies(download_dir, max_age_sec=300)
             return dest
@@ -414,6 +428,13 @@ class App:
             if not path or not os.path.isfile(path):
                 path = None
         return App._path_for_download(path) if path else None
+
+    @staticmethod
+    def path_from_state_for_download(path_value) -> Optional[str]:
+        """Get file path from gr.State (path string) for DownloadButton. Used for BGM separation downloads."""
+        if not path_value or not isinstance(path_value, str) or not os.path.isfile(path_value):
+            return None
+        return App._path_for_download(path_value)
 
     @staticmethod
     def open_folder(folder_path: str) -> None:
