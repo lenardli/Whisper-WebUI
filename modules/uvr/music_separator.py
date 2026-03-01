@@ -137,8 +137,8 @@ class MusicSeparator:
 
         file_paths = []
         if save_file:
-            instrumental_output_path = os.path.join(self.output_dir, "instrumental", f"{output_filename}-instrumental{ext}")
-            vocals_output_path = os.path.join(self.output_dir, "vocals", f"{output_filename}-vocals{ext}")
+            instrumental_output_path = os.path.join(self.output_dir, "instrumental", f"{output_filename}_фон{ext}")
+            vocals_output_path = os.path.join(self.output_dir, "vocals", f"{output_filename}_голос{ext}")
             sf.write(instrumental_output_path, instrumental, sample_rate, format="WAV")
             sf.write(vocals_output_path, vocals, sample_rate, format="WAV")
             file_paths += [instrumental_output_path, vocals_output_path]

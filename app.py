@@ -325,7 +325,7 @@ class App:
                                 btn_download_instrumental = gr.DownloadButton(
                                     value=App.audio_file_for_download,
                                     inputs=[ad_instrumental],
-                                    label='📂',
+                                    label='📂 ' + _("фон"),
                                     scale=1,
                                 )
                             with gr.Row():
@@ -333,7 +333,7 @@ class App:
                                 btn_download_vocals = gr.DownloadButton(
                                     value=App.audio_file_for_download,
                                     inputs=[ad_vocals],
-                                    label='📂',
+                                    label='📂 ' + _("голос"),
                                     scale=1,
                                 )
 
