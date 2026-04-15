@@ -1,6 +1,7 @@
 # from .gitignore
 modules/yt_tmp.wav
 **/venv/
+**/env/
 **/__pycache__/
 **/outputs/
 **/models/
@@ -8,3 +9,13 @@ modules/yt_tmp.wav
 **/.idea
 **/.git
 **/.github
+**/.gradio
+
+*.pem
+*.key
+
+*.md
+*.sh
+*.bat
+
+LICENSE

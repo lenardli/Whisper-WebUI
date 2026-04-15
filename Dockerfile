@@ -26,7 +26,7 @@ WORKDIR /Whisper-WebUI
 COPY . .
 COPY --from=builder /Whisper-WebUI/venv /Whisper-WebUI/venv
 
-RUN openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
+RUN openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Organization/CN=whisper"
 
 RUN sed -i '76s/weights_only=weights_only,/weights_only=False,/' /Whisper-WebUI/venv/lib/python3.11/site-packages/lightning_fabric/utilities/cloud_io.py
 
