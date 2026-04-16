@@ -11,7 +11,7 @@ COPY requirements.txt .
 
 RUN python3 -m venv venv && \
     . venv/bin/activate && \
-    pip install -U -r requirements.txt
+    pip install -U -r requirements.txt --timeout 120
 
 
 FROM debian:bookworm-slim AS runtime
@@ -36,4 +36,4 @@ VOLUME [ "/Whisper-WebUI/outputs" ]
 ENV PATH="/Whisper-WebUI/venv/bin:$PATH"
 ENV LD_LIBRARY_PATH=/Whisper-WebUI/venv/lib64/python3.11/site-packages/nvidia/cublas/lib:/Whisper-WebUI/venv/lib64/python3.11/site-packages/nvidia/cudnn/lib
 
-ENTRYPOINT [ "python", "app.py", "--server_name", "0.0.0.0", "--server_port", "7860", "--ssl_certfile", "cert.pem", "--ssl_keyfile", "key.pem", "--ssl_verify", "False"]
+ENTRYPOINT [ "python3", "app.py", "--server_name", "0.0.0.0", "--server_port", "7860", "--ssl_certfile", "cert.pem", "--ssl_keyfile", "key.pem", "--ssl_verify", "False"]
