@@ -19,6 +19,7 @@ from modules.utils.constants import *
 from modules.utils.logger import get_logger
 from modules.utils.subtitle_manager import *
 from modules.utils.youtube_manager import get_ytdata, get_ytaudio
+from modules.utils.rutube_manager import get_rutube_metas, get_rutube_audio
 from modules.utils.files_manager import get_media_files, format_gradio_files, load_yaml, save_yaml, read_file
 from modules.utils.audio_manager import validate_audio
 from modules.whisper.data_classes import *
@@ -310,7 +311,7 @@ class BaseTranscriptionPipeline(ABC):
                 total_time += info["time_for_task"]
 
             result_str = f"Done in {self.format_time(total_time)}! Subtitle is in the outputs folder.\n\n{total_result}"
-            result_file_path = [info['path'] for info in files_info.values()]
+            result_file_path: List[str] = [os.path.abspath(info["path"]) for info in files_info.values()]
 
             return result_str, result_file_path
 
@@ -323,29 +324,14 @@ class BaseTranscriptionPipeline(ABC):
                        add_timestamp: bool = True,
                        progress=gr.Progress(),
                        *pipeline_params,
-                       ) -> Tuple[str, str]:
+                       ) -> Tuple[str, List[str]]:
         """
-        Write subtitle file from microphone
-
-        Parameters
-        ----------
-        mic_audio: str
-            Audio file path from gr.Microphone()
-        file_format: str
-            Subtitle File format to write from gr.Dropdown(). Supported format: [SRT, WebVTT, txt]
-        add_timestamp: bool
-            Boolean value from gr.Checkbox() that determines whether to add a timestamp at the end of the filename.
-        progress: gr.Progress
-            Indicator to show progress directly in gradio.
-        *pipeline_params: tuple
-            Parameters related with whisper. This will be dealt with "WhisperParameters" data class
+        Write subtitle file from microphone.
 
         Returns
-        ----------
-        result_str:
-            Result of transcription to return to gr.Textbox()
-        result_file_path:
-            Output file path to return to gr.Files()
+        -------
+        Tuple[str, List[str]]
+            (result_str for gr.Textbox(), list of output file paths for gr.Files())
         """
         try:
             params = TranscriptionPipelineParams.from_list(list(pipeline_params))
@@ -375,7 +361,8 @@ class BaseTranscriptionPipeline(ABC):
             )
 
             result_str = f"Done in {self.format_time(time_for_task)}! Subtitle file is in the outputs folder.\n\n{subtitle}"
-            return result_str, file_path
+            paths: List[str] = [os.path.abspath(file_path)] if file_path else []
+            return result_str, paths
         except Exception as e:
             raise RuntimeError(f"Error transcribing mic: {e}") from e
 
@@ -449,6 +436,68 @@ class BaseTranscriptionPipeline(ABC):
 
         except Exception as e:
             raise RuntimeError(f"Error transcribing youtube: {e}") from e
+
+    def transcribe_rutube(self,
+                         rutube_link: str,
+                         file_format: str = "SRT",
+                         add_timestamp: bool = True,
+                         progress=gr.Progress(),
+                         *pipeline_params,
+                         ) -> Tuple[str, List[str]]:
+        """
+        Write subtitle file from Rutube video.
+
+        Returns
+        -------
+        Tuple[str, List[str]]
+            (result_str for gr.Textbox(), list of output file paths for gr.Files())
+        """
+        try:
+            params = TranscriptionPipelineParams.from_list(list(pipeline_params))
+            writer_options = {
+                "highlight_words": True if params.whisper.word_timestamps else False
+            }
+
+            progress(0, desc="Loading Audio from Rutube..")
+            audio = get_rutube_audio(rutube_link)
+            if not audio or not os.path.isfile(audio):
+                raise RuntimeError("Failed to get audio from Rutube link")
+
+            transcribed_segments, time_for_task = self.run(
+                audio,
+                progress,
+                file_format,
+                add_timestamp,
+                None,
+                *pipeline_params,
+            )
+
+            progress(1, desc="Completed!")
+            try:
+                _, title, _ = get_rutube_metas(rutube_link)
+            except Exception:
+                title = "Rutube"
+            file_name = safe_filename(title) if title else "Rutube"
+
+            subtitle, file_path = generate_file(
+                output_dir=self.output_dir,
+                output_file_name=file_name,
+                output_format=file_format,
+                result=transcribed_segments,
+                add_timestamp=add_timestamp,
+                **writer_options
+            )
+
+            result_str = f"Done in {self.format_time(time_for_task)}! Subtitle file is in the outputs folder.\n\n{subtitle}"
+
+            if os.path.exists(audio):
+                os.remove(audio)
+
+            paths: List[str] = [os.path.abspath(file_path)] if file_path else []
+            return result_str, paths
+
+        except Exception as e:
+            raise RuntimeError(f"Error transcribing rutube: {e}") from e
 
     def get_compute_type(self):
         if "float16" in self.available_compute_types:

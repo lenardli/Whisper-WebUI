@@ -1,10 +1,46 @@
-# from .gitignore
-modules/yt_tmp.wav
-**/venv/
+# VCS and CI metadata
+.git/
+.github/
+
+# Virtual environments and Python cache
+venv/
+env/
+.venv/
 **/__pycache__/
+**/*.py[cod]
+**/*.pyo
+**/*.pyd
+
+# Tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.tox/
+
+# IDE/editor folders
+.idea/
+.vscode/
+
+# Local runtime data
+modules/yt_tmp.wav
+outputs/
+models/
 **/outputs/
 **/models/
+.gradio/
 
-**/.idea
-**/.git
-**/.github
+# Local secrets and env files
+*.pem
+*.key
+.env
+.env.*
+
+# Project files not needed in runtime image
+tests/
+backend/tests/
+notebook/
+*.md
+*.sh
+*.bat
+LICENSE

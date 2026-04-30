@@ -1,5 +1,11 @@
 import os
 import argparse
+import platform
+import subprocess
+import shutil
+import time
+import uuid
+from typing import Optional
 import gradio as gr
 from gradio_i18n import Translate, gettext as _
 import yaml
@@ -13,6 +19,7 @@ from modules.translation.nllb_inference import NLLBInference
 from modules.ui.htmls import *
 from modules.utils.cli_manager import str2bool
 from modules.utils.youtube_manager import get_ytmetas
+from modules.utils.rutube_manager import get_rutube_metas
 from modules.translation.deepl_api import DeepLAPI
 from modules.whisper.data_classes import *
 from modules.utils.logger import get_logger
@@ -21,9 +28,36 @@ from modules.utils.logger import get_logger
 logger = get_logger()
 
 
+def _clean_old_download_copies(directory: str, max_age_sec: int = 300) -> None:
+    """Remove temporary download copies older than max_age_sec in directory.
+    Handles both legacy 'download_*' files and uuid-named subdirs containing the copy."""
+    if not os.path.isdir(directory):
+        return
+    now = time.time()
+    try:
+        for name in os.listdir(directory):
+            path = os.path.join(directory, name)
+            if os.path.isfile(path) and name.startswith("download_") and (now - os.path.getmtime(path)) > max_age_sec:
+                try:
+                    os.remove(path)
+                except OSError:
+                    pass
+            elif os.path.isdir(path) and len(name) == 32 and all(c in "0123456789abcdef" for c in name.lower()):
+                if (now - os.path.getmtime(path)) > max_age_sec:
+                    try:
+                        shutil.rmtree(path, ignore_errors=True)
+                    except OSError:
+                        pass
+    except OSError:
+        pass
+
+
 class App:
     def __init__(self, args):
         self.args = args
+        # Serve result files directly from output_dir (no cache copy) to reduce download timeouts
+        output_dir_abs = os.path.abspath(args.output_dir)
+        gr.set_static_paths(paths=[output_dir_abs])
         # Check every 1 hour (3600) for cached files and delete them if older than 1 day (86400)
         self.app = gr.Blocks(css=CSS, theme=self.args.theme, delete_cache=(3600, 86400))
         self.whisper_inf = WhisperFactory.create_whisper_inference(
@@ -73,7 +107,7 @@ class App:
                                                             available_compute_types=self.whisper_inf.available_compute_types,
                                                             compute_type=self.whisper_inf.current_compute_type)
 
-        with gr.Accordion(_("Background Music Remover Filter"), open=False):
+        with gr.Accordion(_("Background Noise Remover Filter"), open=False):
             uvr_inputs = BGMSeparationParams.to_gradio_input(defaults=uvr_params,
                                                              available_models=self.whisper_inf.music_separator.available_models,
                                                              available_devices=self.whisper_inf.music_separator.available_devices,
@@ -133,7 +167,12 @@ class App:
                         with gr.Row():
                             tb_indicator = gr.Textbox(label=_("Output"), scale=5)
                             files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3, interactive=False)
-                            btn_openfolder = gr.Button('📂', scale=1)
+                            btn_openfolder = gr.DownloadButton(
+                                value=App.first_file_for_download,
+                                inputs=[files_subtitles],
+                                label='📂',
+                                scale=1,
+                            )
 
                         params = [input_file, tb_input_folder, cb_include_subdirectory, cb_save_same_dir,
                                   dd_file_format, cb_timestamp]
@@ -141,17 +180,16 @@ class App:
                         btn_run.click(fn=self.whisper_inf.transcribe_file,
                                       inputs=params,
                                       outputs=[tb_indicator, files_subtitles])
-                        btn_openfolder.click(fn=lambda: self.open_folder("outputs"), inputs=None, outputs=None)
 
-                    with gr.TabItem(_("Youtube")):  # tab2
+                    with gr.TabItem(_("Rutube")):  # tab2
                         with gr.Row():
-                            tb_youtubelink = gr.Textbox(label=_("Youtube Link"))
+                            tb_rutubelink = gr.Textbox(label=_("Rutube Link"))
                         with gr.Row(equal_height=True):
                             with gr.Column():
-                                img_thumbnail = gr.Image(label=_("Youtube Thumbnail"))
+                                img_thumbnail = gr.Image(label=_("Rutube Thumbnail"))
                             with gr.Column():
-                                tb_title = gr.Label(label=_("Youtube Title"))
-                                tb_description = gr.Textbox(label=_("Youtube Description"), max_lines=15)
+                                tb_title = gr.Label(label=_("Rutube Title"))
+                                tb_description = gr.Textbox(label=_("Rutube Description"), max_lines=15)
 
                         pipeline_params, dd_file_format, cb_timestamp = self.create_pipeline_inputs()
 
@@ -159,17 +197,21 @@ class App:
                             btn_run = gr.Button(_("GENERATE SUBTITLE FILE"), variant="primary")
                         with gr.Row():
                             tb_indicator = gr.Textbox(label=_("Output"), scale=5)
-                            files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
-                            btn_openfolder = gr.Button('📂', scale=1)
+                            files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3, interactive=False)
+                            btn_openfolder = gr.DownloadButton(
+                                value=App.first_file_for_download,
+                                inputs=[files_subtitles],
+                                label='📂',
+                                scale=1,
+                            )
 
-                        params = [tb_youtubelink, dd_file_format, cb_timestamp]
+                        params = [tb_rutubelink, dd_file_format, cb_timestamp]
 
-                        btn_run.click(fn=self.whisper_inf.transcribe_youtube,
+                        btn_run.click(fn=self.whisper_inf.transcribe_rutube,
                                       inputs=params + pipeline_params,
                                       outputs=[tb_indicator, files_subtitles])
-                        tb_youtubelink.change(get_ytmetas, inputs=[tb_youtubelink],
-                                              outputs=[img_thumbnail, tb_title, tb_description])
-                        btn_openfolder.click(fn=lambda: self.open_folder("outputs"), inputs=None, outputs=None)
+                        tb_rutubelink.change(get_rutube_metas, inputs=[tb_rutubelink],
+                                             outputs=[img_thumbnail, tb_title, tb_description])
 
                     with gr.TabItem(_("Mic")):  # tab3
                         with gr.Row():
@@ -182,15 +224,19 @@ class App:
                             btn_run = gr.Button(_("GENERATE SUBTITLE FILE"), variant="primary")
                         with gr.Row():
                             tb_indicator = gr.Textbox(label=_("Output"), scale=5)
-                            files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
-                            btn_openfolder = gr.Button('📂', scale=1)
+                            files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3, interactive=False)
+                            btn_openfolder = gr.DownloadButton(
+                                value=App.first_file_for_download,
+                                inputs=[files_subtitles],
+                                label='📂',
+                                scale=1,
+                            )
 
                         params = [mic_input, dd_file_format, cb_timestamp]
 
                         btn_run.click(fn=self.whisper_inf.transcribe_mic,
                                       inputs=params + pipeline_params,
                                       outputs=[tb_indicator, files_subtitles])
-                        btn_openfolder.click(fn=lambda: self.open_folder("outputs"), inputs=None, outputs=None)
 
                     with gr.TabItem(_("T2T Translation")):  # tab 4
                         with gr.Row():
@@ -218,18 +264,18 @@ class App:
                                 btn_run = gr.Button(_("TRANSLATE SUBTITLE FILE"), variant="primary")
                             with gr.Row():
                                 tb_indicator = gr.Textbox(label=_("Output"), scale=5)
-                                files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
-                                btn_openfolder = gr.Button('📂', scale=1)
+                                files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3, interactive=False)
+                                btn_openfolder = gr.DownloadButton(
+                                    value=App.first_file_for_download,
+                                    inputs=[files_subtitles],
+                                    label='📂',
+                                    scale=1,
+                                )
 
                         btn_run.click(fn=self.deepl_api.translate_deepl,
                                       inputs=[tb_api_key, file_subs, dd_source_lang, dd_target_lang,
                                               cb_is_pro, cb_timestamp],
                                       outputs=[tb_indicator, files_subtitles])
-
-                        btn_openfolder.click(
-                            fn=lambda: self.open_folder(os.path.join(self.args.output_dir, "translations")),
-                            inputs=None,
-                            outputs=None)
 
                         with gr.TabItem(_("NLLB")):  # sub tab2
                             with gr.Row():
@@ -252,8 +298,13 @@ class App:
                                 btn_run = gr.Button(_("TRANSLATE SUBTITLE FILE"), variant="primary")
                             with gr.Row():
                                 tb_indicator = gr.Textbox(label=_("Output"), scale=5)
-                                files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3)
-                                btn_openfolder = gr.Button('📂', scale=1)
+                                files_subtitles = gr.Files(label=_("Downloadable output file"), scale=3, interactive=False)
+                                btn_openfolder = gr.DownloadButton(
+                                    value=App.first_file_for_download,
+                                    inputs=[files_subtitles],
+                                    label='📂',
+                                    scale=1,
+                                )
                             with gr.Column():
                                 md_vram_table = gr.HTML(NLLB_VRAM_TABLE, elem_id="md_nllb_vram_table")
 
@@ -262,13 +313,8 @@ class App:
                                               nb_max_length, cb_timestamp],
                                       outputs=[tb_indicator, files_subtitles])
 
-                        btn_openfolder.click(
-                            fn=lambda: self.open_folder(os.path.join(self.args.output_dir, "translations")),
-                            inputs=None,
-                            outputs=None)
-
                     with gr.TabItem(_("BGM Separation")):
-                        files_audio = gr.Files(type="filepath", label=_("Upload Audio Files to separate background music"))
+                        files_audio = gr.Files(type="filepath", label=_("Upload Audio Files to separate background noise"))
                         dd_uvr_device = gr.Dropdown(label=_("Device"), value=self.whisper_inf.music_separator.device,
                                                     choices=self.whisper_inf.music_separator.available_devices)
                         dd_uvr_model_size = gr.Dropdown(label=_("Model"), value=uvr_params["uvr_model_size"],
@@ -277,29 +323,37 @@ class App:
                                                         precision=0)
                         cb_uvr_save_file = gr.Checkbox(label=_("Save separated files to output"),
                                                        value=True, visible=False)
-                        btn_run = gr.Button(_("SEPARATE BACKGROUND MUSIC"), variant="primary")
+                        btn_run = gr.Button(_("SEPARATE BACKGROUND NOISE"), variant="primary")
+                        state_instrumental_path = gr.State(value=None)
+                        state_vocals_path = gr.State(value=None)
                         with gr.Column():
                             with gr.Row():
-                                ad_instrumental = gr.Audio(label=_("Instrumental"), scale=8)
-                                btn_open_instrumental_folder = gr.Button('📂', scale=1)
+                                ad_instrumental = gr.Audio(label=_("Background"), scale=8, interactive=False)
+                                btn_download_instrumental = gr.DownloadButton(
+                                    value=App.path_from_state_for_download,
+                                    inputs=[state_instrumental_path],
+                                    label='📂',
+                                    scale=1,
+                                )
                             with gr.Row():
-                                ad_vocals = gr.Audio(label=_("Vocals"), scale=8)
-                                btn_open_vocals_folder = gr.Button('📂', scale=1)
+                                ad_vocals = gr.Audio(label=_("Voice"), scale=8, interactive=False)
+                                btn_download_vocals = gr.DownloadButton(
+                                    value=App.path_from_state_for_download,
+                                    inputs=[state_vocals_path],
+                                    label='📂',
+                                    scale=1,
+                                )
 
-                        btn_run.click(fn=self.whisper_inf.music_separator.separate_files,
+                        def bgm_separation_outputs(*args):
+                            paths = self.whisper_inf.music_separator.separate_files(*args)
+                            if not paths or len(paths) < 2:
+                                return None, None, None, None
+                            return paths[0], paths[1], paths[0], paths[1]
+
+                        btn_run.click(fn=bgm_separation_outputs,
                                       inputs=[files_audio, dd_uvr_model_size, dd_uvr_device, nb_uvr_segment_size,
                                               cb_uvr_save_file],
-                                      outputs=[ad_instrumental, ad_vocals])
-                        btn_open_instrumental_folder.click(inputs=None,
-                                                           outputs=None,
-                                                           fn=lambda: self.open_folder(os.path.join(
-                                                               self.args.output_dir, "UVR", "instrumental"
-                                                           )))
-                        btn_open_vocals_folder.click(inputs=None,
-                                                     outputs=None,
-                                                     fn=lambda: self.open_folder(os.path.join(
-                                                         self.args.output_dir, "UVR", "vocals"
-                                                     )))
+                                      outputs=[ad_instrumental, ad_vocals, state_instrumental_path, state_vocals_path])
 
         # Launch the app with optional gradio settings
         args = self.args
@@ -316,17 +370,85 @@ class App:
             ssl_keyfile=args.ssl_keyfile,
             ssl_keyfile_password=args.ssl_keyfile_password,
             ssl_certfile=args.ssl_certfile,
-            allowed_paths=eval(args.allowed_paths) if args.allowed_paths else None,
+            allowed_paths=(
+                eval(args.allowed_paths)
+                if args.allowed_paths
+                else [os.path.abspath(args.output_dir)]
+            ),
             show_api=False  # Hide "Использовать через API" link
         )
 
     @staticmethod
-    def open_folder(folder_path: str):
-        if os.path.exists(folder_path):
-            os.system(f"start {folder_path}")
+    def _path_for_download(path: str) -> Optional[str]:
+        """Copy file to a unique path but keep original basename so the downloaded file has the same name as the source."""
+        if not path or not os.path.isfile(path):
+            return None
+        base = os.path.basename(path)
+        parent = os.path.dirname(path)
+        download_dir = os.path.join(parent, ".download_cache")
+        try:
+            os.makedirs(download_dir, exist_ok=True)
+        except OSError:
+            download_dir = parent
+        unique_subdir = os.path.join(download_dir, uuid.uuid4().hex)
+        try:
+            os.makedirs(unique_subdir, exist_ok=True)
+            dest = os.path.join(unique_subdir, base)
+            shutil.copy2(path, dest)
+            _clean_old_download_copies(download_dir, max_age_sec=300)
+            return dest
+        except OSError:
+            return path
+
+    @staticmethod
+    def first_file_for_download(files_value) -> Optional[str]:
+        """Get first file path from gr.Files value for DownloadButton. Returns path to a fresh copy for each download."""
+        if not files_value:
+            return None
+        first = files_value[0] if isinstance(files_value, list) else files_value
+        path = None
+        if isinstance(first, str) and os.path.isfile(first):
+            path = first
+        elif isinstance(first, dict):
+            path = first.get("path") or first.get("name")
+            if not path or not os.path.isfile(path):
+                path = None
+        return App._path_for_download(path) if path else None
+
+    @staticmethod
+    def audio_file_for_download(audio_value) -> Optional[str]:
+        """Get file path from gr.Audio value for DownloadButton. Returns path to a fresh copy for each download."""
+        if not audio_value:
+            return None
+        path = None
+        if isinstance(audio_value, str) and os.path.isfile(audio_value):
+            path = audio_value
+        elif isinstance(audio_value, dict):
+            path = audio_value.get("path") or audio_value.get("name")
+            if not path or not os.path.isfile(path):
+                path = None
+        return App._path_for_download(path) if path else None
+
+    @staticmethod
+    def path_from_state_for_download(path_value) -> Optional[str]:
+        """Get file path from gr.State (path string) for DownloadButton. Used for BGM separation downloads."""
+        if not path_value or not isinstance(path_value, str) or not os.path.isfile(path_value):
+            return None
+        return App._path_for_download(path_value)
+
+    @staticmethod
+    def open_folder(folder_path: str) -> None:
+        """Open the output folder in the system file manager. Uses absolute path."""
+        path = os.path.abspath(folder_path)
+        if not os.path.exists(path):
+            os.makedirs(path, exist_ok=True)
+            logger.info("The directory path %s has newly created.", path)
+        if os.name == "nt":
+            os.startfile(path)
+        elif platform.system() == "Darwin":
+            subprocess.run(["open", path], check=False)
         else:
-            os.makedirs(folder_path, exist_ok=True)
-            logger.info(f"The directory path {folder_path} has newly created.")
+            subprocess.run(["xdg-open", path], check=False)
 
 
 parser = argparse.ArgumentParser()
